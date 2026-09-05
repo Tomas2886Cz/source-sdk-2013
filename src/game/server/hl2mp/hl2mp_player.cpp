@@ -108,31 +108,22 @@ const char *g_ppszRandomCitizenModels[] =
 {
 	"models/humans/group03/male_01.mdl",
 	"models/humans/group03/male_02.mdl",
-	"models/humans/group03/female_01.mdl",
 	"models/humans/group03/male_03.mdl",
-	"models/humans/group03/female_02.mdl",
 	"models/humans/group03/male_04.mdl",
-	"models/humans/group03/female_03.mdl",
 	"models/humans/group03/male_05.mdl",
-	"models/humans/group03/female_04.mdl",
-	"models/humans/group03/male_06.mdl",
-	"models/humans/group03/female_06.mdl",
-	"models/humans/group03/male_07.mdl",
-	"models/humans/group03/female_07.mdl",
-	"models/humans/group03/male_08.mdl",
-	"models/humans/group03/male_09.mdl",
 };
 
 const char *g_ppszRandomCombineModels[] =
 {
-	"models/combine_soldier.mdl",
-	"models/combine_soldier_prisonguard.mdl",
-	"models/combine_super_soldier.mdl",
-	"models/police.mdl",
+	"models/humans/group03/male_06.mdl",
+	"models/humans/group03/male_07.mdl",
+	"models/humans/group03/male_08.mdl",
+	"models/humans/group03/male_09.mdl",
+	"models/humans/group03/female_01.mdl",
 };
 
 
-#define MAX_COMBINE_MODELS 4
+#define MAX_COMBINE_MODELS 5
 #define MODEL_CHANGE_INTERVAL 5.0f
 #define TEAM_CHANGE_INTERVAL 5.0f
 
@@ -243,25 +234,25 @@ void CHL2MP_Player::GiveDefaultItems( void )
 {
 	EquipSuit();
 
-	CBasePlayer::GiveAmmo( 255,	"Pistol");
-	CBasePlayer::GiveAmmo( 45,	"SMG1");
-	CBasePlayer::GiveAmmo( 1,	"grenade" );
-	CBasePlayer::GiveAmmo( 6,	"Buckshot");
-	CBasePlayer::GiveAmmo( 6,	"357" );
+	// CBasePlayer::GiveAmmo( 255,	"Pistol");
+	// CBasePlayer::GiveAmmo( 45,	"SMG1");
+	// CBasePlayer::GiveAmmo( 1,	"grenade" );
+	// CBasePlayer::GiveAmmo( 6,	"Buckshot");
+	// CBasePlayer::GiveAmmo( 6,	"357" );
 
 	if ( GetPlayerModelType() == PLAYER_SOUNDS_METROPOLICE || GetPlayerModelType() == PLAYER_SOUNDS_COMBINESOLDIER )
 	{
-		GiveNamedItem( "weapon_stunstick" );
+	//	GiveNamedItem( "weapon_crowbar" );
 	}
 	else if ( GetPlayerModelType() == PLAYER_SOUNDS_CITIZEN )
 	{
-		GiveNamedItem( "weapon_crowbar" );
+	//	GiveNamedItem( "weapon_crowbar" );
 	}
 	
-	GiveNamedItem( "weapon_pistol" );
-	GiveNamedItem( "weapon_smg1" );
-	GiveNamedItem( "weapon_frag" );
-	GiveNamedItem( "weapon_physcannon" );
+	// GiveNamedItem( "weapon_pistol" );
+	// GiveNamedItem( "weapon_smg1" );
+	// GiveNamedItem( "weapon_frag" );
+	// GiveNamedItem( "weapon_physcannon" );
 
 	const char *szDefaultWeaponName = engine->GetClientConVarValue( engine->IndexOfEdict( edict() ), "cl_defaultweapon" );
 

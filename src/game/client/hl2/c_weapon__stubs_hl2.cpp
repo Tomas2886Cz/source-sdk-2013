@@ -25,6 +25,18 @@ STUB_WEAPON_CLASS( weapon_citizenpackage, WeaponCitizenPackage, C_BaseHLCombatWe
 STUB_WEAPON_CLASS( weapon_citizensuitcase, WeaponCitizenSuitcase, C_WeaponCitizenPackage );
 
 #ifndef HL2MP
+
+//TOMBERT MP MOD
+STUB_WEAPON_CLASS( weapon_pistol_tier1, WeaponPistol_Tier1, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_pistol_tier2, WeaponPistol_Tier2, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_smg_tier1, WeaponSMG_Tier1, C_HLSelectFireMachineGun );
+STUB_WEAPON_CLASS( weapon_smg_tier2, WeaponSMG_Tier1, C_HLSelectFireMachineGun );
+STUB_WEAPON_CLASS( weapon_doublebarrel, WeaponDoubleBarrel, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_shotgun_tier1, WeaponShotgun, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_smokegrenade, WeaponSmokeGrenade, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_marksmanrifle_tier1, WeaponMarksmanRifle_Tier1, C_BaseHLCombatWeapon);
+
+//HL2 DM
 STUB_WEAPON_CLASS( weapon_ar2, WeaponAR2, C_HLMachineGun );
 STUB_WEAPON_CLASS( weapon_frag, WeaponFrag, C_BaseHLCombatWeapon );
 STUB_WEAPON_CLASS( weapon_rpg, WeaponRPG, C_BaseHLCombatWeapon );

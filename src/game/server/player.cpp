@@ -6360,6 +6360,15 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_rpg" );
 		GiveNamedItem( "weapon_357" );
 		GiveNamedItem( "weapon_crossbow" );
+		GiveNamedItem("weapon_pistol_tier_1");
+		GiveNamedItem("weapon_pistol_tier_2");
+		GiveNamedItem("weapon_smg_tier_1");
+		GiveNamedItem("weapon_smg_tier_2");
+		GiveNamedItem("weapon_doublebarrel");
+		GiveNamedItem("weapon_shotgun_tier1");
+		GiveNamedItem("weapon_marksmanrifle_tier1");
+		GiveNamedItem("weapon_smokegrenade");
+
 #ifdef HL2_EPISODIC
 		// GiveNamedItem( "weapon_magnade" );
 #endif
@@ -6373,8 +6382,15 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		break;
 
 	case 102:
-		// Gibbage!!!
-		CGib::SpawnRandomGibs( this, 1, GIB_HUMAN );
+		//Tombert
+		GiveNamedItem("weapon_pistol_tier_1");
+		GiveNamedItem("weapon_pistol_tier_2");
+		GiveNamedItem("weapon_smg_tier_1");
+		GiveNamedItem("weapon_smg_tier_2");
+		GiveNamedItem("weapon_doublebarrel");
+		GiveNamedItem("weapon_shotgun_tier1");
+		GiveNamedItem("weapon_marksmanrifle_tier1");
+		GiveNamedItem("weapon_smokegrenade");
 		break;
 
 	case 103:
