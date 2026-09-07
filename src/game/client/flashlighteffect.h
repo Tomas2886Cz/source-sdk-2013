@@ -30,6 +30,10 @@ public:
 	
 protected:
 
+	Quaternion m_quatPrevOrientation;
+	bool m_hasPrevOrientation;
+	void HandleFlashlightLag(FlashlightState_t& state);
+
 	void LightOff();
 	void LightOffOld();
 	void LightOffNew();

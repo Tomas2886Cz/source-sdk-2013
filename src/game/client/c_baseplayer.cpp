@@ -1267,15 +1267,29 @@ void C_BasePlayer::UpdateFlashlight()
 
 			if (!m_pFlashlight)
 				return;
-
+			 
 			m_pFlashlight->TurnOn();
 		}
 
 		Vector vecForward, vecRight, vecUp;
+		C_BaseViewModel* vm = GetViewModel();
+		if (!vm)
+		{
 		EyeVectors( &vecForward, &vecRight, &vecUp );
 
 		// Update the light with the new position and direction.		
 		m_pFlashlight->UpdateLight( EyePosition(), vecForward, vecRight, vecUp, FLASHLIGHT_DISTANCE );
+		}
+
+		else
+		{
+			Vector vecOrigin;
+			QAngle angles;
+			int attachment = vm->LookupAttachment("muzzle"); //Flashlight follows weapon muzzle
+			vm->GetAttachment(attachment, vecOrigin, angles);
+			AngleVectors(angles, &vecForward, &vecRight, &vecUp);
+			m_pFlashlight->UpdateLight(vecOrigin, vecForward, vecRight, vecUp, FLASHLIGHT_DISTANCE);
+		}
 	}
 	else if (m_pFlashlight)
 	{

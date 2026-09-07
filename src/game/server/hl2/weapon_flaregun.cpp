@@ -6,7 +6,6 @@
 //=============================================================================//
 
 #include "cbase.h"
-#include "player.h"
 #include "gamerules.h"
 #include "basehlcombatweapon.h"
 #include "decals.h"
@@ -14,6 +13,15 @@
 #include "IEffects.h"
 #include "engine/IEngineSound.h"
 #include "weapon_flaregun.h"
+
+#ifdef CLIENT_DLL
+#include "c_hl2mp_player.h"
+#include <prediction.h>
+#else
+#include "hl2mp_player.h"
+#endif
+
+#include "weapon_hl2mpbasehlmpcombatweapon.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -364,7 +372,7 @@ void CFlare::FlareBurnTouch( CBaseEntity *pOther )
 {
 	if ( pOther && pOther->m_takedamage && ( m_flNextDamage < gpGlobals->curtime ) )
 	{
-		pOther->TakeDamage( CTakeDamageInfo( this, m_pOwner, 1, (DMG_BULLET|DMG_BURN) ) );
+		pOther->TakeDamage( CTakeDamageInfo( this, m_pOwner, 1, (DMG_BURN|DMG_BURN) ) );
 		m_flNextDamage = gpGlobals->curtime + 1.0f;
 	}
 }
@@ -401,9 +409,11 @@ void CFlare::FlareTouch( CBaseEntity *pOther )
 		}
 
 		//Use m_pOwner, not GetOwnerEntity()
-		pOther->TakeDamage( CTakeDamageInfo( this, m_pOwner, iDamage, (DMG_BULLET|DMG_BURN) ) );
-		m_flNextDamage = gpGlobals->curtime + 1.0f;
 		*/
+
+		int iDamage = 0;
+		pOther->TakeDamage(CTakeDamageInfo(this, m_pOwner, iDamage, (DMG_BURN | DMG_BURN)));
+		m_flNextDamage = gpGlobals->curtime + 1.0f;
 
 		CBaseAnimating *pAnim;
 
@@ -439,7 +449,7 @@ void CFlare::FlareTouch( CBaseEntity *pOther )
 			if ( pdata != NULL )
 			{
 				//Only embed into concrete and wood (jdw: too obscure for players?)
-				//if ( ( pdata->gameMaterial == 'C' ) || ( pdata->gameMaterial == 'W' ) )
+				//( ( pdata->game.Material == 'C' ) || ( pdata->game.Material == 'W' ) )
 				{
 					Vector	impactDir = ( tr.endpos - tr.startpos );
 					VectorNormalize( impactDir );
@@ -709,6 +719,8 @@ void CFlaregun::PrimaryAttack( void )
 
 	pFlare->SetAbsVelocity( forward * 1500 );
 
+	pOwner->ViewPunch(QAngle(-4, random->RandomFloat(-2, 2), 0));
+
 	WeaponSound( SINGLE );
 }
 
@@ -717,36 +729,35 @@ void CFlaregun::PrimaryAttack( void )
 //-----------------------------------------------------------------------------
 void CFlaregun::SecondaryAttack( void )
 {
-	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
-	
-	if ( pOwner == NULL )
+	CBasePlayer* pOwner = ToBasePlayer(GetOwner());
+
+	if (pOwner == NULL)
 		return;
 
-	if ( m_iClip1 <= 0 )
+	if (m_iClip1 <= 0)
 	{
-		SendWeaponAnim( ACT_VM_DRYFIRE );
+		SendWeaponAnim(ACT_VM_DRYFIRE);
 		pOwner->m_flNextAttack = gpGlobals->curtime + SequenceDuration();
 		return;
 	}
 
 	m_iClip1 = m_iClip1 - 1;
 
-	SendWeaponAnim( ACT_VM_PRIMARYATTACK );
+	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
 	pOwner->m_flNextAttack = gpGlobals->curtime + 1;
 
-	CFlare *pFlare = CFlare::Create( pOwner->Weapon_ShootPosition(), pOwner->EyeAngles(), pOwner, FLARE_DURATION );
+	CFlare* pFlare = CFlare::Create(pOwner->Weapon_ShootPosition(), pOwner->EyeAngles(), pOwner, FLARE_DURATION);
 
-	if ( pFlare == NULL )
+	if (pFlare == NULL)
 		return;
 
 	Vector forward;
-	pOwner->EyeVectors( &forward );
+	pOwner->EyeVectors(&forward);
 
-	pFlare->SetAbsVelocity( forward * 750 );
-	pFlare->SetGravity(0.8f);
-	pFlare->SetFriction( 0.45f );
-	pFlare->SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_BOUNCE );
+	pFlare->SetAbsVelocity(forward * 1500);
 
-	WeaponSound( SINGLE );
+	pOwner->ViewPunch(QAngle(-4, random->RandomFloat(-2, 2), 0));
+
+	WeaponSound(SINGLE);
 }
 
