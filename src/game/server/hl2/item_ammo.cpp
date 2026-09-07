@@ -36,6 +36,42 @@ int ITEM_GiveAmmo( CBasePlayer *pPlayer, float flCount, const char *pszAmmoName,
 }
 
 // ========================================================================
+//	>> Medkit
+// ========================================================================
+class CItem_Medkit : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_Medkit, CItem);
+
+	void Spawn(void)
+	{
+		Precache();
+		SetModel("models/items/healthkit_storable.mdl");
+		BaseClass::Spawn();
+	}
+	void Precache(void)
+	{
+		PrecacheModel("models/items/healthkit_storable.mdl");
+	}
+	bool MyTouch(CBasePlayer* pPlayer)
+	{
+		if (ITEM_GiveAmmo(pPlayer, SIZE_AMMO_MEDKIT, "Medkit"))
+		{
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
+			{
+				UTIL_Remove(this);
+			}
+			return true;
+		}
+		return false;
+	}
+#if defined( HL2MP )
+	virtual const char* GetWeaponClassForAmmo() const { return "weapon_medkit"; }
+#endif
+};
+LINK_ENTITY_TO_CLASS(item_ammo_medkit, CItem_Medkit);
+
+// ========================================================================
 //	>> BoxSRounds
 // ========================================================================
 class CItem_BoxSRounds : public CItem
@@ -72,6 +108,7 @@ public:
 #endif
 };
 LINK_ENTITY_TO_CLASS(item_box_srounds, CItem_BoxSRounds);
+LINK_ENTITY_TO_CLASS(item_box_sroundstest, CItem_BoxSRounds);
 LINK_ENTITY_TO_CLASS(item_ammo_pistol, CItem_BoxSRounds);
 
 // ========================================================================

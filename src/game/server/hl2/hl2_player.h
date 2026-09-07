@@ -50,6 +50,10 @@ struct commandgoal_t
 #define	WEAPON_PRIMARY_SLOT			2
 #define	WEAPON_EXPLOSIVE_SLOT		3
 #define	WEAPON_TOOL_SLOT			4
+#define	WEAPON_5_SLOT				5
+#define	WEAPON_6_SLOT				6
+#define	WEAPON_7_SLOT				7
+#define	WEAPON_8_SLOT				8
 
 //=============================================================================
 //=============================================================================

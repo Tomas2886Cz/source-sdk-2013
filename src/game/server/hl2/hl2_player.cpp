@@ -75,7 +75,7 @@ extern ConVar autoaim_max_dist;
 #define PLAYER_HULL_REDUCTION	0.70
 
 // This switches between the single primary weapon, and multiple weapons with buckets approach (jdw)
-#define	HL2_SINGLE_PRIMARY_WEAPON_MODE	0
+#define	HL2_SINGLE_PRIMARY_WEAPON_MODE	1
 
 #define TIME_IGNORE_FALL_DAMAGE 10.0
 
@@ -2687,6 +2687,18 @@ void CHL2_Player::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 	if ( pWeapon->GetSlot() == WEAPON_PRIMARY_SLOT )
 	{
 		Weapon_DropSlot( WEAPON_PRIMARY_SLOT );
+	}
+	if (pWeapon->GetSlot() == WEAPON_EXPLOSIVE_SLOT)
+	{
+		Weapon_DropSlot(WEAPON_EXPLOSIVE_SLOT);
+	}
+	if (pWeapon->GetSlot() == WEAPON_TOOL_SLOT)
+	{
+		Weapon_DropSlot(WEAPON_TOOL_SLOT);
+	}
+	if (pWeapon->GetSlot() == WEAPON_5_SLOT)
+	{
+		Weapon_DropSlot(WEAPON_5_SLOT);
 	}
 
 #endif

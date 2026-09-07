@@ -50,7 +50,7 @@ private:
 	void ToggleZoom(void);                                 // If the weapon is zoomed, un-zoom and vice versa
 	void CheckZoomToggle(void);                            // Check if the secondary attack button has been pressed
 
-	bool m_bInZoom;                                          // Set to true when you are zooming, false when not
+	bool m_bInZoom;                                        // Set to true when you are zooming, false when not
 
 	CWeaponMarksmanRifle_Tier1(const CWeaponMarksmanRifle_Tier1&);
 };

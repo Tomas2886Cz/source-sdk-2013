@@ -176,8 +176,8 @@ char *sTeamNames[] =
 {
 	"Unassigned",
 	"Spectator",
-	"Blue",
-	"Red",
+	"Green",
+	"Yellow",
 };
 
 CHL2MPRules::CHL2MPRules()
@@ -952,6 +952,8 @@ CAmmoDef *GetAmmoDef()
 	{
 		bInitted = true;
 
+		def.AddAmmoType("FlareRound",		DMG_BURN,					TRACER_LINE,			0,			0,			10,			BULLET_IMPULSE(1500, 600), 0);
+		def.AddAmmoType("Medkit",			DMG_GENERIC,				TRACER_NONE,			0,			0,			3,			BULLET_IMPULSE(10, 10), 0);
 		def.AddAmmoType("AR2",				DMG_BULLET,					TRACER_LINE_AND_WHIZ,	0,			0,			60,			BULLET_IMPULSE(200, 1225),	0 );
 		def.AddAmmoType("AR2AltFire",		DMG_DISSOLVE,				TRACER_NONE,			0,			0,			3,			0,							0 );
 		def.AddAmmoType("Pistol",			DMG_BULLET,					TRACER_LINE_AND_WHIZ,	0,			0,			150,		BULLET_IMPULSE(200, 1225),	0 );
@@ -963,6 +965,7 @@ CAmmoDef *GetAmmoDef()
 		def.AddAmmoType("SMG1_Grenade",		DMG_BURN,					TRACER_NONE,			0,			0,			3,			0,							0 );
 		def.AddAmmoType("Grenade",			DMG_BURN,					TRACER_NONE,			0,			0,			5,			0,							0 );
 		def.AddAmmoType("slam",				DMG_BURN,					TRACER_NONE,			0,			0,			5,			0,							0 );
+
 	}
 
 	return &def;

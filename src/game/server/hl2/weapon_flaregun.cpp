@@ -125,15 +125,15 @@ void KillFlare( CBaseEntity *pOwnerEntity, CBaseEntity *pEntity, float flKillTim
 //-----------------------------------------------------------------------------
 CFlare::CFlare( void )
 {
-	m_flScale		= 1.0f;
-	m_nBounces		= 0;
+	m_flScale		= 3.0f;
+	m_nBounces		= 15;
 	m_bFading		= false;
 	m_bLight		= true;
 	m_bSmoke		= true;
 	m_flNextDamage	= gpGlobals->curtime;
 	m_lifeState		= LIFE_ALIVE;
-	m_iHealth		= 100;
-	m_bPropFlare	= false;
+	m_iHealth		= 150;
+	m_bPropFlare	= true;
 	m_bInActiveList	= false;
 	m_pNextFlare	= NULL;
 }
@@ -657,8 +657,6 @@ void CFlare::AddToActiveFlares( void )
 	}
 }
 
-#if 0
-
 IMPLEMENT_SERVERCLASS_ST(CFlaregun, DT_Flaregun)
 END_SEND_TABLE()
 
@@ -744,12 +742,11 @@ void CFlaregun::SecondaryAttack( void )
 	Vector forward;
 	pOwner->EyeVectors( &forward );
 
-	pFlare->SetAbsVelocity( forward * 500 );
-	pFlare->SetGravity(1.0f);
-	pFlare->SetFriction( 0.85f );
+	pFlare->SetAbsVelocity( forward * 750 );
+	pFlare->SetGravity(0.8f);
+	pFlare->SetFriction( 0.45f );
 	pFlare->SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_BOUNCE );
 
 	WeaponSound( SINGLE );
 }
 
-#endif

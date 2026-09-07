@@ -146,7 +146,7 @@ void CWeaponSmokeGrenade::Precache(void)
 	BaseClass::Precache();
 
 #ifndef CLIENT_DLL
-	UTIL_PrecacheOther("npc_grenade_smoke");
+	UTIL_PrecacheOther("env_flare");
 #endif
 
 	PrecacheScriptSound("WeaponSmokeGrenade.Throw");

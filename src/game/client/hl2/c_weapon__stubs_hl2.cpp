@@ -35,6 +35,7 @@ STUB_WEAPON_CLASS( weapon_doublebarrel, WeaponDoubleBarrel, C_BaseHLCombatWeapon
 STUB_WEAPON_CLASS( weapon_shotgun_tier1, WeaponShotgun, C_BaseHLCombatWeapon );
 STUB_WEAPON_CLASS( weapon_smokegrenade, WeaponSmokeGrenade, C_BaseHLCombatWeapon );
 STUB_WEAPON_CLASS( weapon_marksmanrifle_tier1, WeaponMarksmanRifle_Tier1, C_BaseHLCombatWeapon);
+STUB_WEAPON_CLASS( weapon_medkit, WeaponMedkit, C_BaseHLCombatWeapon);
 
 //HL2 DM
 STUB_WEAPON_CLASS( weapon_ar2, WeaponAR2, C_HLMachineGun );

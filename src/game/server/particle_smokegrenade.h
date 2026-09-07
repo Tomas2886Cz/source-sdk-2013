@@ -13,7 +13,7 @@
 #include "baseparticleentity.h"
 
 
-#define PARTICLESMOKEGRENADE_ENTITYNAME	"env_particlesmokegrenade"
+#define PARTICLESMOKEGRENADE_ENTITYNAME	"env_flare"
 
 
 class ParticleSmokeGrenade : public CBaseParticleEntity

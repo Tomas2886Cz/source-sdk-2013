@@ -21,29 +21,37 @@ ConVar	sk_healthvial( "sk_healthvial","0" );
 ConVar	sk_healthcharger( "sk_healthcharger","0" );		
 
 //-----------------------------------------------------------------------------
-// Small health kit. Heals the player when picked up.
+// Small health kit. Heals the player when picked up via the USE key.
 //-----------------------------------------------------------------------------
 class CHealthKit : public CItem
 {
 public:
-	DECLARE_CLASS( CHealthKit, CItem );
+	DECLARE_CLASS(CHealthKit, CItem);
 
-	void Spawn( void );
-	void Precache( void );
-	bool MyTouch( CBasePlayer *pPlayer );
+	void Spawn(void);
+	void Precache(void);
+
+	// 1. Disable the touch pickup logic
+	bool MyTouch(CBasePlayer* pPlayer) { return false; }
+
+	// 2. Tell the engine this object can be "Used" by players
+	int ObjectCaps(void) { return BaseClass::ObjectCaps() | FCAP_IMPULSE_USE; }
+
+	// 3. Handle what happens when the player presses E
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 };
 
-LINK_ENTITY_TO_CLASS( item_healthkit, CHealthKit );
+LINK_ENTITY_TO_CLASS(item_healthkit, CHealthKit);
 PRECACHE_REGISTER(item_healthkit);
 
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CHealthKit::Spawn( void )
+void CHealthKit::Spawn(void)
 {
 	Precache();
-	SetModel( "models/items/healthkit.mdl" );
+	SetModel("models/items/healthkit.mdl");
 
 	BaseClass::Spawn();
 }
@@ -52,46 +60,46 @@ void CHealthKit::Spawn( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CHealthKit::Precache( void )
+void CHealthKit::Precache(void)
 {
 	PrecacheModel("models/items/healthkit.mdl");
 
-	PrecacheScriptSound( "HealthKit.Touch" );
+	PrecacheScriptSound("HealthKit.Touch");
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *pPlayer - 
-// Output : 
+// Purpose: Handles the player pressing 'E' on the health kit
 //-----------------------------------------------------------------------------
-bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
+void CHealthKit::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	if ( pPlayer->TakeHealth( sk_healthkit.GetFloat(), DMG_GENERIC ) )
+	// Make sure a valid player is using the item
+	CBasePlayer* pPlayer = ToBasePlayer(pActivator);
+	if (!pPlayer)
+		return;
+
+	// Attempt to heal the player
+	if (pPlayer->TakeHealth(sk_healthkit.GetFloat(), DMG_GENERIC))
 	{
-		CSingleUserRecipientFilter user( pPlayer );
+		CSingleUserRecipientFilter user(pPlayer);
 		user.MakeReliable();
 
-		UserMessageBegin( user, "ItemPickup" );
-			WRITE_STRING( GetClassname() );
+		UserMessageBegin(user, "ItemPickup");
+		WRITE_STRING(GetClassname());
 		MessageEnd();
 
-		CPASAttenuationFilter filter( pPlayer, "HealthKit.Touch" );
-		EmitSound( filter, pPlayer->entindex(), "HealthKit.Touch" );
+		CPASAttenuationFilter filter(pPlayer, "HealthKit.Touch");
+		EmitSound(filter, pPlayer->entindex(), "HealthKit.Touch");
 
-		if ( g_pGameRules->ItemShouldRespawn( this ) )
+		if (g_pGameRules->ItemShouldRespawn(this))
 		{
 			Respawn();
 		}
 		else
 		{
-			UTIL_Remove(this);	
+			UTIL_Remove(this);
 		}
-
-		return true;
 	}
-
-	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -671,4 +679,3 @@ void CNewWallHealth::Off(void)
 			SetThink( NULL );
 	}
 }
-

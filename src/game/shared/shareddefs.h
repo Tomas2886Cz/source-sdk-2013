@@ -112,17 +112,17 @@ public:
 #define TIME_TO_UNDUCK		0.2
 #define TIME_TO_UNDUCK_MS	200.0f
 
-#define MAX_WEAPON_SLOTS		6	// hud item selection slots
+#define MAX_WEAPON_SLOTS		9	// hud item selection slots
 #define MAX_WEAPON_POSITIONS	20	// max number of items within a slot
-#define MAX_ITEM_TYPES			6	// hud item selection slots
+#define MAX_ITEM_TYPES			9	// hud item selection slots
 #define MAX_WEAPONS				48	// Max number of weapons available
 
 #define MAX_ITEMS				5	// hard coded item types
 
 #define WEAPON_NOCLIP			-1	// clip sizes set to this tell the weapon it doesn't use a clip
 
-#define	MAX_AMMO_TYPES	32		// ???
-#define MAX_AMMO_SLOTS  32		// not really slots
+#define	MAX_AMMO_TYPES	128		// ???
+#define MAX_AMMO_SLOTS  128		// not really slots
 
 #define HUD_PRINTNOTIFY		1
 #define HUD_PRINTCONSOLE	2
@@ -564,8 +564,8 @@ typedef enum
 // basic team colors
 #define COLOR_RED		Color(255, 64, 64, 255)
 #define COLOR_BLUE		Color(153, 204, 255, 255)
-#define COLOR_YELLOW	Color(255, 178, 0, 255)
-#define COLOR_GREEN		Color(153, 255, 153, 255)
+#define COLOR_YELLOW	Color(255, 179, 81, 255)
+#define COLOR_GREEN		Color(99, 188, 82, 255)
 #define COLOR_GREY		Color(204, 204, 204, 255)
 #define COLOR_WHITE		Color(255, 255, 255, 255)
 #define COLOR_BLACK		Color(0, 0, 0, 255)
