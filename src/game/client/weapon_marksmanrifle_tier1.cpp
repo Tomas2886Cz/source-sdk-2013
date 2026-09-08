@@ -227,7 +227,7 @@ void CWeaponMarksmanRifle_Tier1::ToggleZoom(void)
 	if (m_bInZoom)
 	{
 		// Narrowing the Field Of View here is what gives us the zoomed effect
-		if (pPlayer->SetFOV(this, 0, 0.2f))
+		if (pPlayer->SetFOV(this, 0, 0.3f))
 		{
 			m_bInZoom = false;
 
@@ -240,7 +240,7 @@ void CWeaponMarksmanRifle_Tier1::ToggleZoom(void)
 	}
 	else
 	{
-		if (pPlayer->SetFOV(this, 20, 0.1f))
+		if (pPlayer->SetFOV(this, 20, 0.2f))
 		{
 			m_bInZoom = true;
 
