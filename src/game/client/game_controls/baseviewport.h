@@ -17,6 +17,7 @@
 #include "vgui/ISurface.h"
 #include "commandmenu.h"
 #include <igameevents.h>
+#include "menu_background.h"
 
 using namespace vgui;
 
@@ -27,71 +28,71 @@ class IGameEventManager;
 //==============================================================================
 class CBaseViewport : public vgui::EditablePanel, public IViewPort, public IGameEventListener2
 {
-	DECLARE_CLASS_SIMPLE( CBaseViewport, vgui::EditablePanel );
+	DECLARE_CLASS_SIMPLE(CBaseViewport, vgui::EditablePanel);
 
-public: 
+public:
 	CBaseViewport();
 	virtual ~CBaseViewport();
 
-	virtual IViewPortPanel* CreatePanelByName(const char *szPanelName);
-	virtual IViewPortPanel* FindPanelByName(const char *szPanelName);
-	virtual IViewPortPanel* GetActivePanel( void );
-	virtual void RemoveAllPanels( void);
+	virtual IViewPortPanel* CreatePanelByName(const char* szPanelName);
+	virtual IViewPortPanel* FindPanelByName(const char* szPanelName);
+	virtual IViewPortPanel* GetActivePanel(void);
+	virtual void RemoveAllPanels(void);
 
-	virtual void ShowPanel( const char *pName, bool state );
-	virtual void ShowPanel( IViewPortPanel* pPanel, bool state );
-	virtual bool AddNewPanel( IViewPortPanel* pPanel, char const *pchDebugName );
-	virtual void CreateDefaultPanels( void );
-	virtual void UpdateAllPanels( void );
-	virtual void PostMessageToPanel( const char *pName, KeyValues *pKeyValues );
+	virtual void ShowPanel(const char* pName, bool state);
+	virtual void ShowPanel(IViewPortPanel* pPanel, bool state);
+	virtual bool AddNewPanel(IViewPortPanel* pPanel, char const* pchDebugName);
+	virtual void CreateDefaultPanels(void);
+	virtual void UpdateAllPanels(void);
+	virtual void PostMessageToPanel(const char* pName, KeyValues* pKeyValues);
 
-	virtual void Start( IGameUIFuncs *pGameUIFuncs, IGameEventManager2 *pGameEventManager );
+	virtual void Start(IGameUIFuncs* pGameUIFuncs, IGameEventManager2* pGameEventManager);
 	virtual void SetParent(vgui::VPANEL parent);
 
-	virtual void ReloadScheme(const char *fromFile);
+	virtual void ReloadScheme(const char* fromFile);
 	virtual void ActivateClientUI();
 	virtual void HideClientUI();
-	virtual bool AllowedToPrintText( void );
-	
+	virtual bool AllowedToPrintText(void);
+
 #ifndef _XBOX
 	virtual int GetViewPortScheme() { return m_pBackGround->GetScheme(); }
 	virtual VPANEL GetViewPortPanel() { return m_pBackGround->GetVParent(); }
 #endif
-	virtual AnimationController *GetAnimationController() { return m_pAnimController; }
+	virtual AnimationController* GetAnimationController() { return m_pAnimController; }
 
-	virtual void ShowBackGround(bool bShow) 
-	{ 
+	virtual void ShowBackGround(bool bShow)
+	{
 #ifndef _XBOX
-		m_pBackGround->SetVisible( bShow ); 
+		m_pBackGround->SetVisible(bShow);
 #endif
 	}
 
-	virtual int GetDeathMessageStartHeight( void );	
-
-	// virtual void ChatInputPosition( int *x, int *y );
+	virtual int GetDeathMessageStartHeight(void);
+	void StartMainMenuVideo();
+	void StopMainMenuVideo();
 
 	// Check if any panel other than the scoreboard is visible
 	virtual bool IsAnyPanelVisibleExceptScores();
 
 	// Walk through all the panels. Handler should be an object taking an IViewPortPanel*
-	template<typename THandler> void ForEachPanel( THandler handler )
+	template<typename THandler> void ForEachPanel(THandler handler)
 	{
-		FOR_EACH_VEC( m_Panels, i )
+		FOR_EACH_VEC(m_Panels, i)
 		{
-			handler( m_Panels[i] );
+			handler(m_Panels[i]);
 		}
 	}
 
 	// Check if the named panel is visible
-	virtual bool IsPanelVisible( const char* panel );
-	
+	virtual bool IsPanelVisible(const char* panel);
+
 public: // IGameEventListener:
-	virtual void FireGameEvent( IGameEvent * event);
+	virtual void FireGameEvent(IGameEvent* event);
 
 
 protected:
 
-	bool LoadHudAnimations( void );
+	bool LoadHudAnimations(void);
 
 #ifndef _XBOX
 	class CBackGroundPanel : public vgui::Frame
@@ -99,38 +100,38 @@ protected:
 	private:
 		typedef vgui::Frame BaseClass;
 	public:
-		CBackGroundPanel( vgui::Panel *parent) : Frame( parent, "ViewPortBackGround" ) 
+		CBackGroundPanel(vgui::Panel* parent) : Frame(parent, "ViewPortBackGround")
 		{
 			SetScheme("ClientScheme");
 
-			SetTitleBarVisible( false );
+			SetTitleBarVisible(false);
 			SetMoveable(false);
 			SetSizeable(false);
 			SetProportional(true);
 		}
 	private:
 
-		virtual void ApplySchemeSettings(IScheme *pScheme)
+		virtual void ApplySchemeSettings(IScheme* pScheme)
 		{
 			BaseClass::ApplySchemeSettings(pScheme);
-			SetBgColor(pScheme->GetColor("ViewportBG", Color( 0,0,0,0 ) )); 
+			SetBgColor(pScheme->GetColor("ViewportBG", Color(0, 0, 0, 0)));
 		}
 
-		virtual void PerformLayout() 
+		virtual void PerformLayout()
 		{
-			int w,h;
+			int w, h;
 			GetHudSize(w, h);
 
 			// fill the screen
-			SetBounds(0,0,w,h);
+			SetBounds(0, 0, w, h);
 
 			BaseClass::PerformLayout();
 		}
 
-		virtual void OnMousePressed(MouseCode code) { }// don't respond to mouse clicks
-		virtual vgui::VPANEL IsWithinTraverse( int x, int y, bool traversePopups )
+		virtual void OnMousePressed(MouseCode code) {}// don't respond to mouse clicks
+		virtual vgui::VPANEL IsWithinTraverse(int x, int y, bool traversePopups)
 		{
-			return ( vgui::VPANEL )0;
+			return (vgui::VPANEL)0;
 		}
 
 	};
@@ -138,26 +139,26 @@ protected:
 protected:
 
 	virtual void Paint();
-	virtual void OnThink(); 
+	virtual void OnThink();
 	virtual void OnScreenSizeChanged(int iOldWide, int iOldTall);
-	void PostMessageToPanel( IViewPortPanel* pPanel, KeyValues *pKeyValues );
+	void PostMessageToPanel(IViewPortPanel* pPanel, KeyValues* pKeyValues);
 
-protected:
-	IGameUIFuncs*		m_GameuiFuncs; // for key binding details
-	IGameEventManager2*	m_GameEventManager;
+private:
+	IGameUIFuncs* m_GameuiFuncs; // for key binding details
+	IGameEventManager2* m_GameEventManager;
+	class CMainMenu* m_pMainMenuPanel;
 #ifndef _XBOX
-	CBackGroundPanel	*m_pBackGround;
+	CBackGroundPanel* m_pBackGround;
 #endif
 	CUtlVector<IViewPortPanel*> m_Panels;
-	
+
 	bool				m_bHasParent; // Used to track if child windows have parents or not.
 	bool				m_bInitialized;
-	IViewPortPanel		*m_pActivePanel;
-	IViewPortPanel		*m_pLastActivePanel;
+	IViewPortPanel* m_pActivePanel;
+	IViewPortPanel* m_pLastActivePanel;
 	vgui::HCursor		m_hCursorNone;
-	vgui::AnimationController *m_pAnimController;
+	vgui::AnimationController* m_pAnimController;
 	int					m_OldSize[2];
 };
-
 
 #endif

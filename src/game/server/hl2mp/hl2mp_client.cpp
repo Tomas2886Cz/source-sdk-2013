@@ -111,7 +111,7 @@ void ClientActive( edict_t *pEdict, bool bLoadGame )
 	CHL2MP_Player *pPlayer = ToHL2MPPlayer( CBaseEntity::Instance( pEdict ) );
 	FinishClientPutInServer( pPlayer );
 	// TOMBERT PLAYER MODEL SELEKTOR
-	engine->ClientCommand(pEdict, "show_model_menu");
+//	engine->ClientCommand(pEdict, "show_team_menu");
 }
 
 
@@ -217,24 +217,28 @@ CON_COMMAND(select_playermodel, "Selects a player model and spawns the player")
 	if (!pPlayer) return;
 
 	int nSelection = atoi(args[1]);
-	if (nSelection < 0 || nSelection > 9) return;
+	if (nSelection < 0 || nSelection >= GetPlayerModels().Count()) return;
 
-	// Apply the selection
-	pPlayer->ChangeTeam(g_PlayerModels[nSelection].nTeam);
-	pPlayer->SetModel(g_PlayerModels[nSelection].szPath);
+	// Apply the selection using the dynamic list
+	pPlayer->ChangeTeam(GetPlayerModels()[nSelection].nTeam);
+	pPlayer->SetModel(GetPlayerModels()[nSelection].szPath);
 	pPlayer->Spawn();
 
-	// Tally the new counts and broadcast them to everyone's UI
-	byte counts[10] = { 0 };
+	// Tally the new counts dynamically and broadcast them
+	int numModels = GetPlayerModels().Count();
+	CUtlVector<byte> counts;
+	counts.SetCount(numModels);
+	for (int i = 0; i < numModels; i++) counts[i] = 0;
+
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBasePlayer* pTarget = UTIL_PlayerByIndex(i);
 		if (pTarget && pTarget->IsConnected())
 		{
 			const char* pszModel = STRING(pTarget->GetModelName());
-			for (int j = 0; j < 10; j++)
+			for (int j = 0; j < numModels; j++)
 			{
-				if (Q_stricmp(pszModel, g_PlayerModels[j].szPath) == 0)
+				if (Q_stricmp(pszModel, GetPlayerModels()[j].szPath) == 0)
 				{
 					counts[j]++;
 					break;
@@ -245,7 +249,7 @@ CON_COMMAND(select_playermodel, "Selects a player model and spawns the player")
 
 	CReliableBroadcastRecipientFilter filter;
 	UserMessageBegin(filter, "UpdateModelCounts");
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < numModels; i++)
 	{
 		WRITE_BYTE(counts[i]);
 	}

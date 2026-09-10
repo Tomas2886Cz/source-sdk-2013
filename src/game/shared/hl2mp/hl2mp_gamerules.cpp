@@ -876,9 +876,10 @@ void CHL2MPRules::Precache( void )
 {
 	CBaseEntity::PrecacheScriptSound( "AlyxEmp.Charge" );
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < GetPlayerModels().Count(); i++)
 	{
-		CBaseEntity::PrecacheModel(g_PlayerModels[i].szPath);
+		CBaseEntity::PrecacheModel(GetPlayerModels()[i].szPath);
+		CBaseEntity::PrecacheModel(GetPlayerModels()[i].szWeaponModel);
 	}
 }
 
