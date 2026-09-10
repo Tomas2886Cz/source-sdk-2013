@@ -23,6 +23,8 @@ CTeamJoinMenu* g_pTeamJoinMenu = NULL;
 CModelSelectionMenu* g_pModelMenu = NULL;
 
 static ConVar cl_bypass_team_menu("cl_bypass_team_menu", "0", FCVAR_ARCHIVE, "Bypass team and model selection menu on map load for testing");
+static ConVar cl_gashunt_locked_team("cl_gashunt_locked_team", "0", FCVAR_ARCHIVE, "Locked team");
+static ConVar cl_gashunt_locked_model("cl_gashunt_locked_model", "-1", FCVAR_ARCHIVE, "Locked model");
 
 // ---------------------------------------------------------------------------------
 // 3D Model Preview Panel
@@ -95,15 +97,24 @@ class CModelMenuSystem : public CAutoGameSystem
 public:
     CModelMenuSystem() : CAutoGameSystem("CModelMenuSystem") {}
 
+
+    //Includes Gas Hunt Game Mode Checks
     virtual void LevelInitPostEntity()
     {
-        if (cl_bypass_team_menu.GetBool())
-            return;
+        if (cl_bypass_team_menu.GetBool()) return;
 
-        if (!g_pTeamJoinMenu)
+        ConVarRef mp_teamplay("mp_teamplay");
+        if (mp_teamplay.IsValid() && mp_teamplay.GetBool())
         {
-            g_pTeamJoinMenu = new CTeamJoinMenu();
+            if (cl_gashunt_locked_team.GetInt() > 0 && cl_gashunt_locked_model.GetInt() != -1)
+            {
+                engine->ClientCmd(VarArgs("jointeam %d", cl_gashunt_locked_team.GetInt()));
+                engine->ClientCmd(VarArgs("select_playermodel %d", cl_gashunt_locked_model.GetInt()));
+                return; // Bypass menu
+            }
         }
+
+        if (!g_pTeamJoinMenu) g_pTeamJoinMenu = new CTeamJoinMenu();
         g_pTeamJoinMenu->SetVisible(true);
     }
 };
@@ -278,9 +289,18 @@ void CModelPreviewPanel::Paint()
     render->PopView(frustum);
 }
 
+//+ GasHunt Code
 void CModelPreviewPanel::OnMousePressed(vgui::MouseCode code)
 {
     engine->ClientCmd(VarArgs("select_playermodel %d", m_nModelIndex));
+
+    ConVarRef mp_teamplay("mp_teamplay");
+    if (mp_teamplay.IsValid() && mp_teamplay.GetBool())
+    {
+        cl_gashunt_locked_team.SetValue(GetPlayerModels()[m_nModelIndex].nTeam);
+        cl_gashunt_locked_model.SetValue(m_nModelIndex);
+    }
+
     if (g_pModelMenu) g_pModelMenu->SetVisible(false);
 }
 
@@ -522,21 +542,94 @@ void CModelSelectionMenu::OnCommand(const char* command)
 // ---------------------------------------------------------------------------------
 CON_COMMAND(show_team_menu, "Opens the team selection menu")
 {
-    if (!g_pTeamJoinMenu)
+    ConVarRef mp_teamplay("mp_teamplay");
+    if (mp_teamplay.IsValid() && mp_teamplay.GetBool() && cl_gashunt_locked_team.GetInt() > 0)
     {
-        g_pTeamJoinMenu = new CTeamJoinMenu();
+        Msg("Team is locked during the Gashunt campaign!\n");
+        return;
     }
+    if (!g_pTeamJoinMenu) g_pTeamJoinMenu = new CTeamJoinMenu();
     g_pTeamJoinMenu->SetVisible(true);
 }
 
-CON_COMMAND(show_model_menu, "Opens the model selection menu")
+CON_COMMAND(gashunt_reset_character, "Resets campaign character lock")
 {
-    int teamArg = (args.ArgC() > 1) ? Q_atoi(args[1]) : 2;
-    if (g_pModelMenu)
+    cl_gashunt_locked_team.SetValue(0);
+    cl_gashunt_locked_model.SetValue(-1);
+}
+
+// ---------------------------------------------------------------------------------
+// Gashunt Main Menu Campaign Swapper (Client-Side)
+// ---------------------------------------------------------------------------------
+
+// Create dummy variables on the client so the engine doesn't reject them before the server boots
+static ConVar gashunt_active_slot("gashunt_active_slot", "-1", FCVAR_NONE);
+static ConVar gashunt_campaign_name("gashunt_campaign_name", "main_campaign", FCVAR_NONE);
+
+static ConVar cl_gashunt_selected_campaign("cl_gashunt_selected_campaign", "1", FCVAR_ARCHIVE, "Currently selected Gashunt campaign (1-3)");
+
+CON_COMMAND(gashunt_cycle_campaign, "Swaps between 3 Gashunt campaigns")
+{
+    int next = cl_gashunt_selected_campaign.GetInt() + 1;
+    if (next > 3) next = 1;
+    cl_gashunt_selected_campaign.SetValue(next);
+    
+    // Play a UI sound so the player knows the button worked
+    vgui::surface()->PlaySound("ui/buttonclick.wav");
+    Msg("\n>>> SWAPPED TO GASHUNT CAMPAIGN SLOT %d <<<\n\n", next);
+}
+
+CON_COMMAND(gashunt_start_selected, "Starts the currently selected campaign")
+{
+    int sel = cl_gashunt_selected_campaign.GetInt();
+    char cmd[256];
+    
+    // Define your 3 campaigns and their starting maps here:
+    if (sel == 1)
     {
-        g_pModelMenu->MarkForDeletion();
-        g_pModelMenu = NULL;
+        Q_snprintf(cmd, sizeof(cmd), "gashunt_active_slot 1; gashunt_campaign_name main_campaign; map hl2dm_map1");
     }
-    g_pModelMenu = new CModelSelectionMenu(teamArg);
-    g_pModelMenu->SetVisible(true);
+    else if (sel == 2)
+    {
+        Q_snprintf(cmd, sizeof(cmd), "gashunt_active_slot 2; gashunt_campaign_name second_campaign; map hl2dm_map4");
+    }
+    else if (sel == 3)
+    {
+        Q_snprintf(cmd, sizeof(cmd), "gashunt_active_slot 3; gashunt_campaign_name third_campaign; map hl2dm_map7");
+    }
+    
+    // Wipe old save file locally to ensure a clean start
+    char szSavePath[128];
+    Q_snprintf(szSavePath, sizeof(szSavePath), "save/gashunt_slot%d.sav", sel);
+    g_pFullFileSystem->RemoveFile(szSavePath, "MOD");
+
+    // Clear the character lock so the player can pick a new team/model
+    engine->ClientCmd("gashunt_reset_character");
+
+    // Launch the server
+    engine->ClientCmd(cmd);
+}
+
+CON_COMMAND(gashunt_resume_selected, "Resumes the currently selected campaign")
+{
+    int sel = cl_gashunt_selected_campaign.GetInt();
+    char szSavePath[128];
+    Q_snprintf(szSavePath, sizeof(szSavePath), "save/gashunt_slot%d.sav", sel);
+    
+    KeyValues *kvLoad = new KeyValues("GashuntSave");
+    if (kvLoad->LoadFromFile(g_pFullFileSystem, szSavePath, "MOD")) 
+    {
+        const char *szMap = kvLoad->GetString("current_map", "hl2dm_map1");
+        const char *szCamp = kvLoad->GetString("campaign", "main_campaign");
+        
+        char cmd[256];
+        Q_snprintf(cmd, sizeof(cmd), "gashunt_active_slot %d; gashunt_campaign_name %s; map %s", sel, szCamp, szMap);
+        engine->ClientCmd(cmd);
+    }
+    else
+    {
+        vgui::surface()->PlaySound("common/wpn_denyselect.wav");
+        Msg("\n[GASHUNT] No save file found for Campaign Slot %d!\n\n", sel);
+    }
+    kvLoad->deleteThis();
 }

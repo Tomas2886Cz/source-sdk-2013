@@ -73,11 +73,6 @@ extern ConVar replay_rendersetting_renderglow;
 
 int ScreenTransform(const Vector& point, Vector& screen);
 
-ConVar cl_hud_sway_enabled("cl_hud_sway_enabled", "1", FCVAR_ARCHIVE, "Enables or disables sway on the rest of the HUD.");
-ConVar cl_hud_sway_scale("cl_hud_sway_scale", "0.15", FCVAR_ARCHIVE, "Controls how much the rest of the HUD subtly sways along with the viewmodel.");
-ConVar cl_hud_sway_speed("cl_hud_sway_speed", "6.0", FCVAR_ARCHIVE, "Controls the inertia and smoothing response speed for the rest of the HUD.");
-ConVar cl_hud_sway_max_offset("cl_hud_sway_max_offset", "40.0", FCVAR_ARCHIVE, "Controls the maximum pixel distance the rest of the HUD can sway from the center.");
-
 extern int BottomWeaponSelection_KeyInput(int down, ButtonCode_t keynum, const char* pszCurrentBinding);
 
 #define ACHIEVEMENT_ANNOUNCEMENT_MIN_TIME 10
@@ -492,50 +487,6 @@ void ClientModeShared::OverrideView(CViewSetup* pSetup)
 		pSetup->m_OrthoTop = -h;
 		pSetup->m_OrthoRight = w;
 		pSetup->m_OrthoBottom = h;
-	}
-
-	vgui::Panel* pViewport = GetViewport();
-
-	if (pViewport)
-	{
-		if (pPlayer && pPlayer->GetObserverMode() == OBS_MODE_NONE && cl_hud_sway_enabled.GetBool())
-		{
-			// Read the player's view punch angles (recoil, impacts, explosions)
-			QAngle angPunch = pPlayer->m_Local.m_vecPunchAngle;
-
-			int vx, vy, vw, vh;
-			vgui::surface()->GetFullscreenViewport(vx, vy, vw, vh);
-
-			// Convert punch angles into screen pixel offsets (Yaw affects X, Pitch affects Y)
-			float flScale = cl_hud_sway_scale.GetFloat() * 25.0f;
-			float flTargetHudX = -angPunch[YAW] * flScale;
-			float flTargetHudY = angPunch[PITCH] * flScale;
-
-			// Persistent smoothed variables for physical inertia and lag
-			static float s_flSmoothHudX = 0.0f;
-			static float s_flSmoothHudY = 0.0f;
-
-			float flHudSpeed = cl_hud_sway_speed.GetFloat() * gpGlobals->frametime;
-			flHudSpeed = clamp(flHudSpeed, 0.0f, 1.0f);
-
-			s_flSmoothHudX = Approach(flTargetHudX, s_flSmoothHudX, flHudSpeed * 50.0f);
-			s_flSmoothHudY = Approach(flTargetHudY, s_flSmoothHudY, flHudSpeed * 50.0f);
-
-			// Apply upper limit constraint
-			float flMaxOffset = cl_hud_sway_max_offset.GetFloat();
-			s_flSmoothHudX = clamp(s_flSmoothHudX, -flMaxOffset, flMaxOffset);
-			s_flSmoothHudY = clamp(s_flSmoothHudY, -flMaxOffset, flMaxOffset);
-
-			pViewport->SetPos((int)(s_flSmoothHudX + 0.5f), (int)(s_flSmoothHudY + 0.5f));
-		}
-		else
-		{
-			vgui::Panel* pViewportPanel = GetViewport();
-			if (pViewportPanel)
-			{
-				pViewportPanel->SetPos(0, 0);
-			}
-		}
 	}
 }
 

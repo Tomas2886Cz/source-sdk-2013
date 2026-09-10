@@ -23,7 +23,6 @@
 #include <KeyValues.h>
 #include "filesystem.h"
 #include "matsys_controls/matsyscontrols.h"
-#include "ui_main_menu.h"
 
 #ifdef SIXENSE
 #include "sixense/in_sixense.h"
@@ -197,8 +196,6 @@ bool VGui_Startup(CreateInterfaceFn appSystemFactory)
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-static CUIMainMenu* g_pUIMainMenu = NULL;
-
 void VGui_CreateGlobalPanels(void)
 {
 	VPANEL gameToolParent = enginevgui->GetPanel(PANEL_CLIENTDLL_TOOLS);
@@ -230,7 +227,6 @@ void VGui_CreateGlobalPanels(void)
 	VPANEL gameUIPanel = enginevgui->GetPanel(PANEL_GAMEUIDLL);
 	if (gameUIPanel)
 	{
-		g_pUIMainMenu = new CUIMainMenu(gameUIPanel);
 	}
 }
 

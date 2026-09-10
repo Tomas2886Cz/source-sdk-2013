@@ -23,6 +23,7 @@
 #include "gamestats.h"
 #include "ammodef.h"
 #include "NextBot.h"
+#include "gashunt_manager.h"
 
 #include "engine/IEngineSound.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
@@ -268,16 +269,26 @@ void CHL2MP_Player::GiveDefaultItems(void)
 {
 	EquipSuit();
 
-	GiveNamedItem("weapon_crowbar");
-	GiveNamedItem("weapon_medkit");
-	GiveNamedItem("weapon_flaregun");
+	//If Playing Gashunt Give Gashunt Items
+	extern ConVar gashunt_active_slot;
+	if (gashunt_active_slot.GetInt() != -1)
+	{
+		g_pGashuntManager->ApplyPlayerStats(this);
+	}
+	//Otherwise Give Basic New Game Equipment
+	else
+	{
+		GiveNamedItem("weapon_crowbar");
+		GiveNamedItem("weapon_medkit");
+		GiveNamedItem("weapon_flaregun");
 
-	CBasePlayer::GiveAmmo(4, "FlareRound");
-	CBasePlayer::GiveAmmo(25, "Scrap_Medical");
-	CBasePlayer::GiveAmmo(25, "Scrap_Weapon");
-	CBasePlayer::GiveAmmo(25, "Scrap_Utility");
+		CBasePlayer::GiveAmmo(4, "FlareRound");
+		CBasePlayer::GiveAmmo(25, "Scrap_Medical");
+		CBasePlayer::GiveAmmo(25, "Scrap_Weapon");
+		CBasePlayer::GiveAmmo(25, "Scrap_Utility");
 
-	GiveNamedItem("weapon_blueprint_medkit");
+		GiveNamedItem("weapon_blueprint_medkit");
+	}
 
 	const char* szDefaultWeaponName = engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_defaultweapon");
 

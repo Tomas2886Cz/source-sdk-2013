@@ -58,6 +58,8 @@ CBaseHL2MPCombatWeapon::CBaseHL2MPCombatWeapon( void )
 
 }
 
+
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -393,6 +395,7 @@ void CBaseHL2MPCombatWeapon::AddViewmodelBob( CBaseViewModel *viewmodel, Vector 
 	angles[ YAW ]	-= g_lateralBob  * 0.3f;
 
 	VectorMA( origin, g_lateralBob * 0.8f, right, origin );
+	BaseClass::AddViewmodelBob(viewmodel, origin, angles);
 }
 
 //-----------------------------------------------------------------------------
@@ -407,6 +410,8 @@ float CBaseHL2MPCombatWeapon::GetSpreadBias( WeaponProficiency_t proficiency )
 	return BaseClass::GetSpreadBias( proficiency );
 }
 //-----------------------------------------------------------------------------
+
+
 
 const WeaponProficiencyInfo_t *CBaseHL2MPCombatWeapon::GetProficiencyValues()
 {

@@ -707,6 +707,7 @@ public:
 
 	void	ResetDeathCount();
 	void	IncrementDeathCount( int nCount );
+	void	SetDeathCount(int count) { m_iDeaths = count; } // Add this line
 
 	void	SetArmorValue( int value );
 	void	IncrementArmorValue( int nCount, int nMaxValue = -1 );

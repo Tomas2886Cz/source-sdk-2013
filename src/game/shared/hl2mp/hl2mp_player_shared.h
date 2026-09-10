@@ -12,6 +12,12 @@
 #define HL2MP_PUSHAWAY_THINK_INTERVAL		(1.0f / 20.0f)
 #include "studio.h"
 
+#if defined( CLIENT_DLL )
+class C_HL2MP_Player;
+#define CHL2MP_Player C_HL2MP_Player
+#else
+class CHL2MP_Player;
+#endif
 
 enum
 {
@@ -28,11 +34,6 @@ enum HL2MPPlayerState
 	STATE_OBSERVER_MODE,		// Noclipping around, watching players, etc.
 	NUM_PLAYER_STATES
 };
-
-
-#if defined( CLIENT_DLL )
-#define CHL2MP_Player C_HL2MP_Player
-#endif
 
 class CPlayerAnimState
 {
