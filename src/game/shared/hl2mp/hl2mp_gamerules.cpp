@@ -10,6 +10,7 @@
 #include "gameeventdefs.h"
 #include <KeyValues.h>
 #include "ammodef.h"
+#include "hl2mp_playermodels.h"
 
 #ifdef CLIENT_DLL
 	#include "c_hl2mp_player.h"
@@ -36,7 +37,16 @@
 
 extern void respawn(CBaseEntity *pEdict, bool fCopyCorpse);
 
-extern bool FindInList( const char **pStrings, const char *pToFind );
+bool FindInList(const char** pStrings, const char* pToFind)
+{
+	int i;
+	for (i = 0; pStrings[i] != NULL; i++)
+	{
+		if (Q_stricmp(pStrings[i], pToFind) == 0)
+			return true;
+	}
+	return false;
+}
 
 ConVar sv_hl2mp_weapon_respawn_time( "sv_hl2mp_weapon_respawn_time", "20", FCVAR_GAMEDLL | FCVAR_NOTIFY );
 ConVar sv_hl2mp_item_respawn_time( "sv_hl2mp_item_respawn_time", "30", FCVAR_GAMEDLL | FCVAR_NOTIFY );
@@ -865,6 +875,11 @@ float CHL2MPRules::GetMapRemainingTime()
 void CHL2MPRules::Precache( void )
 {
 	CBaseEntity::PrecacheScriptSound( "AlyxEmp.Charge" );
+
+	for (int i = 0; i < 10; i++)
+	{
+		CBaseEntity::PrecacheModel(g_PlayerModels[i].szPath);
+	}
 }
 
 #ifdef GAME_DLL

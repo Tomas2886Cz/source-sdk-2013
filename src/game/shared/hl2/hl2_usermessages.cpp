@@ -45,7 +45,12 @@ void RegisterUserMessages( void )
 	usermessages->Register( "LogoTimeMsg", 4 );
 	usermessages->Register( "AchievementEvent", -1 );
 	usermessages->Register( "UpdateJalopyRadar", -1 );
-	usermessages->Register( "ShowScope", 1 ); // show the sniper scope
+
+	//TOMBERT MOD
+	usermessages->Register( "ShowScope", 1 );  // Pro optiku u pusky
+
+	//TOMBERT MOD PLAYERMODEL SELEKTOR
+	usermessages->Register("UpdateModelCounts", 10); //Pro model selector
 
 #ifndef _X360
 	// NVNT register haptic user messages

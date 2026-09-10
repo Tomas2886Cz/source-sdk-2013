@@ -1475,6 +1475,8 @@ void CViewRender::ViewDrawScene( bool bDrew3dSkybox, SkyboxVisibility_t nSkyboxV
 	{
 		g_pClientShadowMgr->UnlockAllShadowDepthTextures();
 	}
+	//GLOWS
+	//GetGlowEffect().DrawGlowEffects();
 }
 
 
@@ -2025,42 +2027,42 @@ const char *COM_GetModDirectory();
 //			whatToDraw - 
 //-----------------------------------------------------------------------------
 // This renders the entire 3D view.
-void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int whatToDraw )
+void CViewRender::RenderView(const CViewSetup& viewRender, int nClearFlags, int whatToDraw)
 {
 	m_UnderWaterOverlayMaterial.Shutdown();					// underwater view will set
 
 	m_CurrentView = viewRender;
 
-	C_BaseAnimating::AutoAllowBoneAccess boneaccess( true, true );
-	VPROF( "CViewRender::RenderView" );
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
+	C_BaseAnimating::AutoAllowBoneAccess boneaccess(true, true);
+	VPROF("CViewRender::RenderView");
+	tmZone(TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__);
 
 	// Don't want TF2 running less than DX 8
-	if ( g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 80 )
+	if (g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 80)
 	{
 		// We know they were running at least 8.0 when the game started...we check the 
 		// value in ClientDLL_Init()...so they must be messing with their DirectX settings.
-		if ( ( Q_stricmp( COM_GetModDirectory(), "tf" ) == 0 ) || ( Q_stricmp( COM_GetModDirectory(), "tf_beta" ) == 0 ) )
+		if ((Q_stricmp(COM_GetModDirectory(), "tf") == 0) || (Q_stricmp(COM_GetModDirectory(), "tf_beta") == 0))
 		{
 			static bool bFirstTime = true;
-			if ( bFirstTime )
+			if (bFirstTime)
 			{
 				bFirstTime = false;
-				Msg( "This game has a minimum requirement of DirectX 8.0 to run properly.\n" );
+				Msg("This game has a minimum requirement of DirectX 8.0 to run properly.\n");
 			}
 			return;
 		}
 	}
 
-	CMatRenderContextPtr pRenderContext( materials );
-	ITexture *saveRenderTarget = pRenderContext->GetRenderTarget();
+	CMatRenderContextPtr pRenderContext(materials);
+	ITexture* saveRenderTarget = pRenderContext->GetRenderTarget();
 	pRenderContext.SafeRelease(); // don't want to hold for long periods in case in a locking active share thread mode
 
-	if ( !m_rbTakeFreezeFrame[viewRender.m_eStereoEye ] && m_flFreezeFrameUntil > gpGlobals->curtime )
+	if (!m_rbTakeFreezeFrame[viewRender.m_eStereoEye] && m_flFreezeFrameUntil > gpGlobals->curtime)
 	{
-		CRefPtr<CFreezeFrameView> pFreezeFrameView = new CFreezeFrameView( this );
-		pFreezeFrameView->Setup( viewRender );
-		AddViewToScene( pFreezeFrameView );
+		CRefPtr<CFreezeFrameView> pFreezeFrameView = new CFreezeFrameView(this);
+		pFreezeFrameView->Setup(viewRender);
+		AddViewToScene(pFreezeFrameView);
 
 		g_bRenderingView = true;
 		s_bCanAccessCurrentView = true;
@@ -2071,56 +2073,56 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 
 		g_pClientShadowMgr->AdvanceFrame();
 
-	#ifdef USE_MONITORS
-		if ( cl_drawmonitors.GetBool() && 
-			( g_pMaterialSystemHardwareConfig->GetDXSupportLevel() >= 70 ) &&
-			( ( whatToDraw & RENDERVIEW_SUPPRESSMONITORRENDERING ) == 0 ) )
+#ifdef USE_MONITORS
+		if (cl_drawmonitors.GetBool() &&
+			(g_pMaterialSystemHardwareConfig->GetDXSupportLevel() >= 70) &&
+			((whatToDraw & RENDERVIEW_SUPPRESSMONITORRENDERING) == 0))
 		{
-			CViewSetup viewMiddle = GetView( STEREO_EYE_MONO );
-			DrawMonitors( viewMiddle );	
+			CViewSetup viewMiddle = GetView(STEREO_EYE_MONO);
+			DrawMonitors(viewMiddle);
 		}
-	#endif
+#endif
 
 		g_bRenderingView = true;
 
 		// Must be first 
 		render->SceneBegin();
 
-		pRenderContext.GetFrom( materials );
+		pRenderContext.GetFrom(materials);
 		pRenderContext->TurnOnToneMapping();
 		pRenderContext.SafeRelease();
 
 		// clear happens here probably
-		SetupMain3DView( viewRender, nClearFlags );
-			 	  
+		SetupMain3DView(viewRender, nClearFlags);
+
 		bool bDrew3dSkybox = false;
 		SkyboxVisibility_t nSkyboxVisible = SKYBOX_NOT_VISIBLE;
 
 		// if the 3d skybox world is drawn, then don't draw the normal skybox
-		CSkyboxView *pSkyView = new CSkyboxView( this );
-		if ( ( bDrew3dSkybox = pSkyView->Setup( viewRender, &nClearFlags, &nSkyboxVisible ) ) != false )
+		CSkyboxView* pSkyView = new CSkyboxView(this);
+		if ((bDrew3dSkybox = pSkyView->Setup(viewRender, &nClearFlags, &nSkyboxVisible)) != false)
 		{
-			AddViewToScene( pSkyView );
+			AddViewToScene(pSkyView);
 		}
-		SafeRelease( pSkyView );
+		SafeRelease(pSkyView);
 
 		// Force it to clear the framebuffer if they're in solid space.
-		if ( ( nClearFlags & VIEW_CLEAR_COLOR ) == 0 )
+		if ((nClearFlags & VIEW_CLEAR_COLOR) == 0)
 		{
-			if ( enginetrace->GetPointContents( viewRender.origin ) == CONTENTS_SOLID )
+			if (enginetrace->GetPointContents(viewRender.origin) == CONTENTS_SOLID)
 			{
 				nClearFlags |= VIEW_CLEAR_COLOR;
 			}
 		}
 
 		// Render world and all entities, particles, etc.
-		if( !g_pIntroData )
+		if (!g_pIntroData)
 		{
-			ViewDrawScene( bDrew3dSkybox, nSkyboxVisible, viewRender, nClearFlags, VIEW_MAIN, whatToDraw & RENDERVIEW_DRAWVIEWMODEL );
+			ViewDrawScene(bDrew3dSkybox, nSkyboxVisible, viewRender, nClearFlags, VIEW_MAIN, whatToDraw & RENDERVIEW_DRAWVIEWMODEL);
 		}
 		else
 		{
-			ViewDrawScene_Intro( viewRender, nClearFlags, *g_pIntroData );
+			ViewDrawScene_Intro(viewRender, nClearFlags, *g_pIntroData);
 		}
 
 		// We can still use the 'current view' stuff set up in ViewDrawScene
@@ -2140,84 +2142,89 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 		RenderPlayerSprites();
 
 		// Image-space motion blur
-		if ( !building_cubemaps.GetBool() && viewRender.m_bDoBloomAndToneMapping ) // We probably should use a different view. variable here
+		if (!building_cubemaps.GetBool() && viewRender.m_bDoBloomAndToneMapping) // We probably should use a different view. variable here
 		{
-			static ConVarRef mat_motion_blur_enabled( "mat_motion_blur_enabled" );
-			if ( ( mat_motion_blur_enabled.GetInt() ) && ( g_pMaterialSystemHardwareConfig->GetDXSupportLevel() >= 90 ) )
+			static ConVarRef mat_motion_blur_enabled("mat_motion_blur_enabled");
+			if ((mat_motion_blur_enabled.GetInt()) && (g_pMaterialSystemHardwareConfig->GetDXSupportLevel() >= 90))
 			{
-				pRenderContext.GetFrom( materials );
+				pRenderContext.GetFrom(materials);
 				{
-					PIXEVENT( pRenderContext, "DoImageSpaceMotionBlur" );
-					DoImageSpaceMotionBlur( viewRender, viewRender.x, viewRender.y, viewRender.width, viewRender.height );
+					PIXEVENT(pRenderContext, "DoImageSpaceMotionBlur");
+					DoImageSpaceMotionBlur(viewRender, viewRender.x, viewRender.y, viewRender.width, viewRender.height);
 				}
 				pRenderContext.SafeRelease();
 			}
 		}
 
-		GetClientModeNormal()->DoPostScreenSpaceEffects( &viewRender );
+		GetClientModeNormal()->DoPostScreenSpaceEffects(&viewRender);
 
 		// Now actually draw the viewmodel
-		DrawViewModels( viewRender, whatToDraw & RENDERVIEW_DRAWVIEWMODEL );
+		DrawViewModels(viewRender, whatToDraw & RENDERVIEW_DRAWVIEWMODEL);
 
 		DrawUnderwaterOverlay();
 
 		PixelVisibility_EndScene();
 
+		// -------------------------------------------------------------------
+		// GLOW SYSTEM HOOK
+		// Render the L4D stencil glow outlines BEFORE post-processing locks the buffers!
+		// -------------------------------------------------------------------
+
 		// Draw fade over entire screen if needed
 		byte color[4];
 		bool blend;
-		vieweffects->GetFadeParams( &color[0], &color[1], &color[2], &color[3], &blend );
+		vieweffects->GetFadeParams(&color[0], &color[1], &color[2], &color[3], &blend);
 
 		// Draw an overlay to make it even harder to see inside smoke particle systems.
 		DrawSmokeFogOverlay();
 
 		// Overlay screen fade on entire screen
 		IMaterial* pMaterial = blend ? m_ModulateSingleColor : m_TranslucentSingleColor;
-		render->ViewDrawFade( color, pMaterial );
-		PerformScreenOverlay( viewRender.x, viewRender.y, viewRender.width, viewRender.height );
+		render->ViewDrawFade(color, pMaterial);
+		PerformScreenOverlay(viewRender.x, viewRender.y, viewRender.width, viewRender.height);
 
 		// Prevent sound stutter if going slow
-		engine->Sound_ExtraUpdate();	
-	
-		if ( !building_cubemaps.GetBool() && viewRender.m_bDoBloomAndToneMapping )
+		engine->Sound_ExtraUpdate();
+
+		if (!building_cubemaps.GetBool() && viewRender.m_bDoBloomAndToneMapping)
 		{
-			pRenderContext.GetFrom( materials );
+			pRenderContext.GetFrom(materials);
 			{
-				PIXEVENT( pRenderContext, "DoEnginePostProcessing" );
+				PIXEVENT(pRenderContext, "DoEnginePostProcessing");
 
 				bool bFlashlightIsOn = false;
-				C_BasePlayer *pLocal = C_BasePlayer::GetLocalPlayer();
-				if ( pLocal )
+				C_BasePlayer* pLocal = C_BasePlayer::GetLocalPlayer();
+				if (pLocal)
 				{
-					bFlashlightIsOn = pLocal->IsEffectActive( EF_DIMLIGHT );
+					bFlashlightIsOn = pLocal->IsEffectActive(EF_DIMLIGHT);
 				}
-				DoEnginePostProcessing( viewRender.x, viewRender.y, viewRender.width, viewRender.height, bFlashlightIsOn );
+				DoEnginePostProcessing(viewRender.x, viewRender.y, viewRender.width, viewRender.height, bFlashlightIsOn);
 			}
 			pRenderContext.SafeRelease();
 		}
 
 		// And here are the screen-space effects
 
-		if ( IsPC() )
+		if (IsPC())
 		{
-			tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "GrabPreColorCorrectedFrame" );
+			tmZone(TELEMETRY_LEVEL0, TMZF_NONE, "GrabPreColorCorrectedFrame");
 
 			// Grab the pre-color corrected frame for editing purposes
-			engine->GrabPreColorCorrectedFrame( viewRender.x, viewRender.y, viewRender.width, viewRender.height );
+			engine->GrabPreColorCorrectedFrame(viewRender.x, viewRender.y, viewRender.width, viewRender.height);
 		}
 
-		PerformScreenSpaceEffects( 0, 0, viewRender.width, viewRender.height );
+		PerformScreenSpaceEffects(0, 0, viewRender.width, viewRender.height);
 
-		if ( g_pMaterialSystemHardwareConfig->GetHDRType() == HDR_TYPE_INTEGER )
+		if (g_pMaterialSystemHardwareConfig->GetHDRType() == HDR_TYPE_INTEGER)
 		{
-			pRenderContext.GetFrom( materials );
-			pRenderContext->SetToneMappingScaleLinear(Vector(1,1,1));
+			pRenderContext.GetFrom(materials);
+			pRenderContext->SetToneMappingScaleLinear(Vector(1, 1, 1));
 			pRenderContext.SafeRelease();
 		}
 
-		CleanupMain3DView( viewRender );
+		CleanupMain3DView(viewRender);
 
-		if ( m_rbTakeFreezeFrame[viewRender.m_eStereoEye ] )
+		if (m_rbTakeFreezeFrame[viewRender.m_eStereoEye])
 		{
 			Rect_t rect;
 			rect.x = viewRender.x;
@@ -2226,46 +2233,46 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 			rect.height = viewRender.height;
 
 			pRenderContext = materials->GetRenderContext();
-			if ( IsX360() )
+			if (IsX360())
 			{
 				// 360 doesn't create the Fullscreen texture
-				pRenderContext->CopyRenderTargetToTextureEx( GetFullFrameFrameBufferTexture( 1 ), 0, &rect, &rect );
+				pRenderContext->CopyRenderTargetToTextureEx(GetFullFrameFrameBufferTexture(1), 0, &rect, &rect);
 			}
 			else
 			{
-				pRenderContext->CopyRenderTargetToTextureEx( GetFullscreenTexture(), 0, &rect, &rect );
+				pRenderContext->CopyRenderTargetToTextureEx(GetFullscreenTexture(), 0, &rect, &rect);
 			}
 			pRenderContext.SafeRelease();
-			m_rbTakeFreezeFrame[viewRender.m_eStereoEye ] = false;
+			m_rbTakeFreezeFrame[viewRender.m_eStereoEye] = false;
 		}
 
 		pRenderContext = materials->GetRenderContext();
-		pRenderContext->SetRenderTarget( saveRenderTarget );
+		pRenderContext->SetRenderTarget(saveRenderTarget);
 		pRenderContext.SafeRelease();
 
 		// Draw the overlay
-		if ( m_bDrawOverlay )
-		{	   
-			tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "DrawOverlay" );
+		if (m_bDrawOverlay)
+		{
+			tmZone(TELEMETRY_LEVEL0, TMZF_NONE, "DrawOverlay");
 
 			// This allows us to be ok if there are nested overlay views
 			CViewSetup currentView = m_CurrentView;
 			CViewSetup tempView = m_OverlayViewSetup;
-			tempView.fov = ScaleFOVByWidthRatio( tempView.fov, tempView.m_flAspectRatio / ( 4.0f / 3.0f ) );
+			tempView.fov = ScaleFOVByWidthRatio(tempView.fov, tempView.m_flAspectRatio / (4.0f / 3.0f));
 			tempView.m_bDoBloomAndToneMapping = false;	// FIXME: Hack to get Mark up and running
 			m_bDrawOverlay = false;
-			RenderView( tempView, m_OverlayClearFlags, m_OverlayDrawFlags );
+			RenderView(tempView, m_OverlayClearFlags, m_OverlayDrawFlags);
 			m_CurrentView = currentView;
 		}
 
 	}
 
-	if ( mat_viewportupscale.GetBool() && mat_viewportscale.GetFloat() < 1.0f ) 
+	if (mat_viewportupscale.GetBool() && mat_viewportscale.GetFloat() < 1.0f)
 	{
-		CMatRenderContextPtr pRenderContextUpscale( materials );
+		CMatRenderContextPtr pRenderContextUpscale(materials);
 
-		ITexture	*pFullFrameFB1 = materials->FindTexture( "_rt_FullFrameFB1", TEXTURE_GROUP_RENDER_TARGET );
-		IMaterial	*pCopyMaterial = materials->FindMaterial( "dev/upscale", TEXTURE_GROUP_OTHER );
+		ITexture* pFullFrameFB1 = materials->FindTexture("_rt_FullFrameFB1", TEXTURE_GROUP_RENDER_TARGET);
+		IMaterial* pCopyMaterial = materials->FindMaterial("dev/upscale", TEXTURE_GROUP_OTHER);
 		pCopyMaterial->IncrementReferenceCount();
 
 		Rect_t	DownscaleRect, UpscaleRect;
@@ -2280,28 +2287,28 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 		UpscaleRect.width = viewRender.m_nUnscaledWidth;
 		UpscaleRect.height = viewRender.m_nUnscaledHeight;
 
-		pRenderContextUpscale->CopyRenderTargetToTextureEx( pFullFrameFB1, 0, &DownscaleRect, &DownscaleRect );
-		pRenderContextUpscale->DrawScreenSpaceRectangle( pCopyMaterial, UpscaleRect.x, UpscaleRect.y, UpscaleRect.width, UpscaleRect.height,
-			DownscaleRect.x, DownscaleRect.y, DownscaleRect.x+DownscaleRect.width-1, DownscaleRect.y+DownscaleRect.height-1, 
-			pFullFrameFB1->GetActualWidth(), pFullFrameFB1->GetActualHeight() );
+		pRenderContextUpscale->CopyRenderTargetToTextureEx(pFullFrameFB1, 0, &DownscaleRect, &DownscaleRect);
+		pRenderContextUpscale->DrawScreenSpaceRectangle(pCopyMaterial, UpscaleRect.x, UpscaleRect.y, UpscaleRect.width, UpscaleRect.height,
+			DownscaleRect.x, DownscaleRect.y, DownscaleRect.x + DownscaleRect.width - 1, DownscaleRect.y + DownscaleRect.height - 1,
+			pFullFrameFB1->GetActualWidth(), pFullFrameFB1->GetActualHeight());
 
 		pCopyMaterial->DecrementReferenceCount();
 	}
 
 	// if we're in VR mode we might need to override the render target
-	if( UseVR() )
+	if (UseVR())
 	{
-		saveRenderTarget = g_pSourceVR->GetRenderTarget( (ISourceVirtualReality::VREye)(viewRender.m_eStereoEye - 1), ISourceVirtualReality::RT_Color );
+		saveRenderTarget = g_pSourceVR->GetRenderTarget((ISourceVirtualReality::VREye)(viewRender.m_eStereoEye - 1), ISourceVirtualReality::RT_Color);
 	}
 
 	// Draw the 2D graphics
-	render->Push2DView( viewRender, 0, saveRenderTarget, GetFrustum() );
+	render->Push2DView(viewRender, 0, saveRenderTarget, GetFrustum());
 
-	Render2DEffectsPreHUD( viewRender );
+	Render2DEffectsPreHUD(viewRender);
 
-	if ( whatToDraw & RENDERVIEW_DRAWHUD )
+	if (whatToDraw & RENDERVIEW_DRAWHUD)
 	{
-		VPROF_BUDGET( "VGui_DrawHud", VPROF_BUDGETGROUP_OTHER_VGUI );
+		VPROF_BUDGET("VGui_DrawHud", VPROF_BUDGETGROUP_OTHER_VGUI);
 		int viewWidth = viewRender.m_nUnscaledWidth;
 		int viewHeight = viewRender.m_nUnscaledHeight;
 		int viewActualWidth = viewRender.m_nUnscaledWidth;
@@ -2314,13 +2321,13 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 		int viewFramebufferHeight = viewHeight;
 		bool bClear = false;
 		bool bPaintMainMenu = false;
-		ITexture *pTexture = NULL;
-		if( UseVR() )
+		ITexture* pTexture = NULL;
+		if (UseVR())
 		{
-			if( g_ClientVirtualReality.ShouldRenderHUDInWorld() )
+			if (g_ClientVirtualReality.ShouldRenderHUDInWorld())
 			{
-				pTexture = materials->FindTexture( "_rt_gui", NULL, false );
-				if( pTexture )
+				pTexture = materials->FindTexture("_rt_gui", NULL, false);
+				if (pTexture)
 				{
 					bPaintMainMenu = true;
 					bClear = true;
@@ -2329,10 +2336,10 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 					viewActualWidth = pTexture->GetActualWidth();
 					viewActualHeight = pTexture->GetActualHeight();
 
-					vgui::surface()->GetScreenSize( viewWidth, viewHeight );
+					vgui::surface()->GetScreenSize(viewWidth, viewHeight);
 
 					viewFramebufferX = 0;
-					if( viewRender.m_eStereoEye == STEREO_EYE_RIGHT && !saveRenderTarget )
+					if (viewRender.m_eStereoEye == STEREO_EYE_RIGHT && !saveRenderTarget)
 						viewFramebufferX = viewFramebufferWidth;
 					viewFramebufferY = 0;
 				}
@@ -2349,62 +2356,62 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 		pRenderContext = materials->GetRenderContext();
 
 		// clear depth in the backbuffer before we push the render target
-		if( bClear )
+		if (bClear)
 		{
-			pRenderContext->ClearBuffers( false, true, true );
+			pRenderContext->ClearBuffers(false, true, true);
 		}
 
 		// constrain where VGUI can render to the view
-		pRenderContext->PushRenderTargetAndViewport( pTexture, NULL, viewX, viewY, viewActualWidth, viewActualHeight );
+		pRenderContext->PushRenderTargetAndViewport(pTexture, NULL, viewX, viewY, viewActualWidth, viewActualHeight);
 		// If drawing off-screen, force alpha for that pass
 		if (pTexture)
 		{
-			pRenderContext->OverrideAlphaWriteEnable( true, true );
+			pRenderContext->OverrideAlphaWriteEnable(true, true);
 		}
 
 		// let vgui know where to render stuff for the forced-to-framebuffer panels
-		if( UseVR() )
+		if (UseVR())
 		{
-			g_pMatSystemSurface->SetFullscreenViewportAndRenderTarget( viewFramebufferX, viewFramebufferY, viewFramebufferWidth, viewFramebufferHeight, saveRenderTarget );
+			g_pMatSystemSurface->SetFullscreenViewportAndRenderTarget(viewFramebufferX, viewFramebufferY, viewFramebufferWidth, viewFramebufferHeight, saveRenderTarget);
 		}
 
 		// clear the render target if we need to
-		if( bClear )
+		if (bClear)
 		{
-			pRenderContext->ClearColor4ub( 0, 0, 0, 0 );
-			pRenderContext->ClearBuffers( true, false );
+			pRenderContext->ClearColor4ub(0, 0, 0, 0);
+			pRenderContext->ClearBuffers(true, false);
 		}
 		pRenderContext.SafeRelease();
 
-		tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "VGui_DrawHud", __FUNCTION__ );
+		tmZone(TELEMETRY_LEVEL0, TMZF_NONE, "VGui_DrawHud", __FUNCTION__);
 
 		// paint the vgui screen
 		VGui_PreRender();
 
 		// Make sure the client .dll root panel is at the proper point before doing the "SolveTraverse" calls
-		vgui::VPANEL root = enginevgui->GetPanel( PANEL_CLIENTDLL );
-		if ( root != 0 )
+		vgui::VPANEL root = enginevgui->GetPanel(PANEL_CLIENTDLL);
+		if (root != 0)
 		{
-			vgui::ipanel()->SetSize( root, viewWidth, viewHeight );
+			vgui::ipanel()->SetSize(root, viewWidth, viewHeight);
 		}
 		// Same for client .dll tools
-		root = enginevgui->GetPanel( PANEL_CLIENTDLL_TOOLS );
-		if ( root != 0 )
+		root = enginevgui->GetPanel(PANEL_CLIENTDLL_TOOLS);
+		if (root != 0)
 		{
-			vgui::ipanel()->SetSize( root, viewWidth, viewHeight );
+			vgui::ipanel()->SetSize(root, viewWidth, viewHeight);
 		}
 
 		// The crosshair, etc. needs to get at the current setup stuff
-		AllowCurrentViewAccess( true );
+		AllowCurrentViewAccess(true);
 
 		// Draw the in-game stuff based on the actual viewport being used
-		render->VGui_Paint( PAINT_INGAMEPANELS );
+		render->VGui_Paint(PAINT_INGAMEPANELS);
 
 		// maybe paint the main menu and cursor too if we're in stereo hud mode
-		if( bPaintMainMenu )
-			render->VGui_Paint( PAINT_UIPANELS | PAINT_CURSOR );
+		if (bPaintMainMenu)
+			render->VGui_Paint(PAINT_UIPANELS | PAINT_CURSOR);
 
-		AllowCurrentViewAccess( false );
+		AllowCurrentViewAccess(false);
 
 		VGui_PostRender();
 
@@ -2412,28 +2419,28 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 		pRenderContext = materials->GetRenderContext();
 		if (pTexture)
 		{
-			pRenderContext->OverrideAlphaWriteEnable( false, true );
+			pRenderContext->OverrideAlphaWriteEnable(false, true);
 		}
 		pRenderContext->PopRenderTargetAndViewport();
 
-		if ( UseVR() )
+		if (UseVR())
 		{
 			// figure out if we really want to draw the HUD based on freeze cam
-			C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-			bool bInFreezeCam = ( pPlayer && pPlayer->GetObserverMode() == OBS_MODE_FREEZECAM );
+			C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+			bool bInFreezeCam = (pPlayer && pPlayer->GetObserverMode() == OBS_MODE_FREEZECAM);
 
 			// draw the HUD after the view model so its "I'm closer" depth queues work right.
-			if( !bInFreezeCam && g_ClientVirtualReality.ShouldRenderHUDInWorld() )
+			if (!bInFreezeCam && g_ClientVirtualReality.ShouldRenderHUDInWorld())
 			{
 				// Now we've rendered the HUD to its texture, actually get it on the screen.
 				// Since we're drawing it as a 3D object, we need correctly set up frustum, etc.
 				int ClearFlags = 0;
-				SetupMain3DView( viewRender, ClearFlags );
+				SetupMain3DView(viewRender, ClearFlags);
 
 				// TODO - a bit of a shonky test - basically trying to catch the main menu, the briefing screen, the loadout screen, etc.
 				bool bTranslucent = !g_pMatSystemSurface->IsCursorVisible();
-				g_ClientVirtualReality.RenderHUDQuad( g_pClientMode->ShouldBlackoutAroundHUD(), bTranslucent );
-				CleanupMain3DView( viewRender );
+				g_ClientVirtualReality.RenderHUDQuad(g_pClientMode->ShouldBlackoutAroundHUD(), bTranslucent);
+				CleanupMain3DView(viewRender);
 			}
 		}
 
@@ -2441,21 +2448,21 @@ void CViewRender::RenderView( const CViewSetup &viewRender, int nClearFlags, int
 		pRenderContext.SafeRelease();
 	}
 
-	CDebugViewRender::Draw2DDebuggingInfo( viewRender );
+	CDebugViewRender::Draw2DDebuggingInfo(viewRender);
 
-	Render2DEffectsPostHUD( viewRender );
+	Render2DEffectsPostHUD(viewRender);
 
 	g_bRenderingView = false;
 
 	// We can no longer use the 'current view' stuff set up in ViewDrawScene
 	s_bCanAccessCurrentView = false;
 
-	if ( IsPC() )
+	if (IsPC())
 	{
 		CDebugViewRender::GenerateOverdrawForTesting();
 	}
 
-	render->PopView( GetFrustum() );
+	render->PopView(GetFrustum());
 	g_WorldListCache.Flush();
 }
 
@@ -5451,6 +5458,7 @@ void CBaseWorldView::DrawSetup( float waterHeight, int nSetupFlags, float waterZ
 
 	g_CurrentViewID = savedViewID;
 }
+
 
 
 void MaybeInvalidateLocalPlayerAnimation()

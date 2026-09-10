@@ -28,6 +28,9 @@
 
 #include "tier0/vprof.h"
 
+// TOMBERT PLAYERMODEL SELEKTOR
+#include "hl2mp_playermodels.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -107,6 +110,8 @@ void ClientActive( edict_t *pEdict, bool bLoadGame )
 
 	CHL2MP_Player *pPlayer = ToHL2MPPlayer( CBaseEntity::Instance( pEdict ) );
 	FinishClientPutInServer( pPlayer );
+	// TOMBERT PLAYER MODEL SELEKTOR
+	engine->ClientCommand(pEdict, "show_model_menu");
 }
 
 
@@ -202,3 +207,47 @@ void InstallGameRules()
 	CreateGameRulesObject( "CHL2MPRules" );
 }
 
+//TOMBERT PLAYERMODEL SELEKTOR
+
+CON_COMMAND(select_playermodel, "Selects a player model and spawns the player")
+{
+	if (args.ArgC() < 2) return;
+
+	CBasePlayer* pPlayer = UTIL_GetCommandClient();
+	if (!pPlayer) return;
+
+	int nSelection = atoi(args[1]);
+	if (nSelection < 0 || nSelection > 9) return;
+
+	// Apply the selection
+	pPlayer->ChangeTeam(g_PlayerModels[nSelection].nTeam);
+	pPlayer->SetModel(g_PlayerModels[nSelection].szPath);
+	pPlayer->Spawn();
+
+	// Tally the new counts and broadcast them to everyone's UI
+	byte counts[10] = { 0 };
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer* pTarget = UTIL_PlayerByIndex(i);
+		if (pTarget && pTarget->IsConnected())
+		{
+			const char* pszModel = STRING(pTarget->GetModelName());
+			for (int j = 0; j < 10; j++)
+			{
+				if (Q_stricmp(pszModel, g_PlayerModels[j].szPath) == 0)
+				{
+					counts[j]++;
+					break;
+				}
+			}
+		}
+	}
+
+	CReliableBroadcastRecipientFilter filter;
+	UserMessageBegin(filter, "UpdateModelCounts");
+	for (int i = 0; i < 10; i++)
+	{
+		WRITE_BYTE(counts[i]);
+	}
+	MessageEnd();
+}

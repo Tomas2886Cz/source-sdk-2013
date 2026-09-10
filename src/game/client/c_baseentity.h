@@ -15,6 +15,8 @@
 #pragma once
 #endif
 
+
+#include "engine/IEngineSound.h"
 #include "mathlib/vector.h"
 #include "icliententityinternal.h"
 #include "engine/ivmodelinfo.h"

@@ -1,34 +1,33 @@
-#pragma once
+#ifndef CEFFECTGLOW_H
+#define CEFFECTGLOW_H
 
-#include "cbase.h"
+#include "materialsystem/itexture.h"
+#include "materialsystem/imaterial.h"
 
 class CEntGlowEffect
 {
 public:
 	static CEntGlowEffect& GetInstance()
 	{
-		static CEntGlowEffect instance;
-		return instance;
+		static CEntGlowEffect s_Instance;
+		return s_Instance;
 	}
 
 	void Init(void);
 	void Shutdown(void);
+	void RenderGlowModels(void);
+	void RenderGlowPostProcess(void);
 	void DrawGlowEffects(void);
 
-	bool IsVisible() const { return m_bVisible; }
-	void SetVisible(bool state) { m_bVisible = state; }
-
 private:
-	CEntGlowEffect() : m_bVisible(true) {}
-	bool m_bVisible;
-
+	bool m_bInitialized = false;
 	CTextureReference m_GlowBuff1;
 	CTextureReference m_GlowBuff2;
-
-	// Declare the material pointers here
-	IMaterial* m_pBlurX;
-	IMaterial* m_pBlurY;
-	IMaterial* m_pEffectMaterial;
+	IMaterial* m_pBlurX = nullptr;	
+	IMaterial* m_pBlurY = nullptr;
+	IMaterial* m_pEffectMaterial = nullptr;
 };
 
 CEntGlowEffect& GetGlowEffect();
+
+#endif // CEFFECTGLOW_H

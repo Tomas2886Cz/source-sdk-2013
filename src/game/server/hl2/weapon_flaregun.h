@@ -100,6 +100,7 @@ public:
 	void Precache( void );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
+	virtual void Touch(CBaseEntity* pOther);
 
 	DECLARE_DATADESC();
 

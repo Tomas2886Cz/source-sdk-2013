@@ -1,0 +1,8 @@
+//edited
+hl2_usermessages.cpp
+hl2mp_gamerules.cpp
+hl2mp_client.cpp
+
+//new
+hl2mp_playermodels.h
+hl2mp_modelmenu.cpp

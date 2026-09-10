@@ -459,63 +459,49 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 float g_fMaxViewModelLag = 1.5f;
 
 ConVar sv_viewmodel_lag_do_angles( "sv_viewmodel_lag_do_angles", "1", FCVAR_CHEAT | FCVAR_REPLICATED );
+ConVar cl_viewmodel_lag_enabled("cl_viewmodel_lag_enabled", "1", FCVAR_ARCHIVE, "Enables or disables multi-axis rotational viewmodel lag.");
+ConVar cl_viewmodel_lag_speed("cl_viewmodel_lag_speed", "6.0", FCVAR_ARCHIVE, "Controls the spring slack speed for viewmodel rotation.");
+ConVar cl_viewmodel_lag_scale("cl_viewmodel_lag_scale", "1.2", FCVAR_ARCHIVE, "Controls the intensity of the rotational lag offset.");
+ConVar cl_viewmodel_lag_max_offset("cl_viewmodel_lag_max_offset", "30.0", FCVAR_ARCHIVE, "Maximum rotational deviation angle allowed.");
 
-void CBaseViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
+void CBaseViewModel::CalcViewModelLag(Vector& origin, QAngle& angles, QAngle& original_angles)
 {
-	Vector vOriginalOrigin = origin;
-	QAngle vOriginalAngles = angles;
+	if (!cl_viewmodel_lag_enabled.GetBool())
+		return;
 
-	// Calculate our drift
-	Vector	forward;
-	AngleVectors( angles, &forward, NULL, NULL );
+	CBaseEntity* pOwner = GetOwner();
+	if (!pOwner)
+		return;
 
-	if ( gpGlobals->frametime != 0.0f )
-	{
-		Vector vDifference;
-		VectorSubtract( forward, m_vecLastFacing, vDifference );
+	static QAngle s_angLastAngles = original_angles;
+	static QAngle s_angLaggedOffset(0, 0, 0);
 
-		float flSpeed = 5.0f;
+	// Capture frame-to-frame rotational delta across all axes (including roll banking)
+	QAngle angDelta = original_angles - s_angLastAngles;
+	s_angLastAngles = original_angles;
 
-		// If we start to lag too far behind, we'll increase the "catch up" speed.  Solves the problem with fast cl_yawspeed, m_yaw or joysticks
-		//  rotating quickly.  The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
-		float flDiff = vDifference.Length();
-		if ( (flDiff > g_fMaxViewModelLag) && (g_fMaxViewModelLag > 0.0f) )
-		{
-			float flScale = flDiff / g_fMaxViewModelLag;
-			flSpeed *= flScale;
-		}
+	angDelta[YAW] = AngleNormalize(angDelta[YAW]);
+	angDelta[PITCH] = AngleNormalize(angDelta[PITCH]);
+	angDelta[ROLL] = AngleNormalize(angDelta[ROLL]);
 
-		// FIXME:  Needs to be predictable?
-		VectorMA( m_vecLastFacing, flSpeed * gpGlobals->frametime, vDifference, m_vecLastFacing );
-		// Make sure it doesn't grow out of control!!!
-		VectorNormalize( m_vecLastFacing );
-		VectorMA( origin, 5.0f, vDifference * -1.0f, origin );
+	float flScale = cl_viewmodel_lag_scale.GetFloat();
+	float flSpeed = cl_viewmodel_lag_speed.GetFloat() * gpGlobals->frametime;
+	flSpeed = clamp(flSpeed, 0.0f, 1.0f);
 
-		Assert( m_vecLastFacing.IsValid() );
-	}
+	// Free-form multi-axis rotational accumulation with elastic slack
+	s_angLaggedOffset[PITCH] += ((-angDelta[PITCH] * flScale) - s_angLaggedOffset[PITCH]) * flSpeed;
+	s_angLaggedOffset[YAW] += ((-angDelta[YAW] * flScale) - s_angLaggedOffset[YAW]) * flSpeed;
+	s_angLaggedOffset[ROLL] += ((-angDelta[ROLL] * flScale * 0.5f) - s_angLaggedOffset[ROLL]) * flSpeed;
 
-	if ( sv_viewmodel_lag_do_angles.GetBool() )
-	{
-		Vector right, up;
-		AngleVectors( original_angles, &forward, &right, &up );
+	float flMaxOffset = cl_viewmodel_lag_max_offset.GetFloat();
+	s_angLaggedOffset[PITCH] = clamp(s_angLaggedOffset[PITCH], -flMaxOffset, flMaxOffset);
+	s_angLaggedOffset[YAW] = clamp(s_angLaggedOffset[YAW], -flMaxOffset, flMaxOffset);
+	s_angLaggedOffset[ROLL] = clamp(s_angLaggedOffset[ROLL], -flMaxOffset * 0.5f, flMaxOffset * 0.5f);
 
-		float pitch = original_angles[ PITCH ];
-		if ( pitch > 180.0f )
-			pitch -= 360.0f;
-		else if ( pitch < -180.0f )
-			pitch += 360.0f;
-
-		if ( g_fMaxViewModelLag == 0.0f )
-		{
-			origin = vOriginalOrigin;
-			angles = vOriginalAngles;
-		}
-
-		//FIXME: These are the old settings that caused too many exposed polys on some models
-		VectorMA( origin, -pitch * 0.035f,	forward,	origin );
-		VectorMA( origin, -pitch * 0.03f,		right,	origin );
-		VectorMA( origin, -pitch * 0.02f,		up,		origin);
-	}
+	// Apply the rotational orientation offsets to pitch, yaw, and roll simultaneously
+	angles[PITCH] += s_angLaggedOffset[PITCH];
+	angles[YAW] += s_angLaggedOffset[YAW];
+	angles[ROLL] += s_angLaggedOffset[ROLL];
 }
 
 //-----------------------------------------------------------------------------

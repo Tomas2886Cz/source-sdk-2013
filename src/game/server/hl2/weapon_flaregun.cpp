@@ -751,6 +751,11 @@ void CFlaregun::ItemUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	}
 }
 
+void CFlaregun::Touch(CBaseEntity* pOther)
+{
+	// Disable automatic touch pickup; require +use instead
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
