@@ -5,6 +5,7 @@
 //=============================================================================//
 
 #include "cbase.h"
+
 #include "weapon_hl2mpbasehlmpcombatweapon.h"
 #include "hl2mp_player.h"
 #include "globalstate.h"
@@ -37,6 +38,42 @@ extern CBaseEntity* g_pLastSpawn;
 
 ConVar hl2mp_spawn_frag_fallback_radius("hl2mp_spawn_frag_fallback_radius", "48", FCVAR_NONE, "If no spawns are available, kill players with this radius to allow new players to spawn.");
 
+// Customizable Downed ConVars
+ConVar sv_downed_enable("sv_downed_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Enable or disable the downed state feature (1 = Enabled, 0 = Disabled).");
+ConVar sv_downed_bleedout_time("sv_downed_bleedout_time", "30", FCVAR_REPLICATED | FCVAR_NOTIFY, "Base time in seconds before a downed player bleeds out.");
+ConVar sv_downed_speed("sv_downed_speed", "40.0", FCVAR_REPLICATED | FCVAR_NOTIFY, "Movement crawl speed while downed.");
+
+ConVar sv_downed_time_1("sv_downed_time_1", "30", FCVAR_REPLICATED | FCVAR_NOTIFY, "Bleedout time in seconds for the 1st down.");
+ConVar sv_downed_time_2("sv_downed_time_2", "20", FCVAR_REPLICATED | FCVAR_NOTIFY, "Bleedout time in seconds for the 2nd down.");
+ConVar sv_downed_time_3("sv_downed_time_3", "10", FCVAR_REPLICATED | FCVAR_NOTIFY, "Bleedout time in seconds for the 3rd down.");
+ConVar sv_downed_time_4("sv_downed_time_4", "5", FCVAR_REPLICATED | FCVAR_NOTIFY, "Bleedout time in seconds for the 4th down.");
+ConVar sv_downed_time_5("sv_downed_time_5", "3", FCVAR_REPLICATED | FCVAR_NOTIFY, "Bleedout time in seconds for the 5th down and beyond.");
+
+ConVar sv_downed_revive_enable("sv_downed_revive_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Allows or blocks teammates from reviving downed players.");
+ConVar sv_downed_revive_duration("sv_downed_revive_duration", "5.0", FCVAR_REPLICATED | FCVAR_NOTIFY, "Time required in seconds for a teammate to revive a downed player.", true, 0.1f, false, 0.0f);
+
+void RegisterDownedConVars()
+{
+	if (!cvar)
+		return;
+
+	static bool s_bRegistered = false;
+	if (s_bRegistered)
+		return;
+
+	cvar->RegisterConCommand(&sv_downed_enable);
+	cvar->RegisterConCommand(&sv_downed_bleedout_time);
+	cvar->RegisterConCommand(&sv_downed_speed);
+	cvar->RegisterConCommand(&sv_downed_time_1);
+	cvar->RegisterConCommand(&sv_downed_time_2);
+	cvar->RegisterConCommand(&sv_downed_time_3);
+	cvar->RegisterConCommand(&sv_downed_time_4);
+	cvar->RegisterConCommand(&sv_downed_time_5);
+	cvar->RegisterConCommand(&sv_downed_revive_enable);
+	cvar->RegisterConCommand(&sv_downed_revive_duration);
+	s_bRegistered = true;
+}
+
 #define HL2MP_COMMAND_MAX_RATE 0.3
 
 void DropPrimedFragGrenade(CHL2MP_Player* pPlayer, CBaseCombatWeapon* pGrenade);
@@ -46,9 +83,7 @@ LINK_ENTITY_TO_CLASS(player, CHL2MP_Player);
 LINK_ENTITY_TO_CLASS(info_player_combine, CPointEntity);
 LINK_ENTITY_TO_CLASS(info_player_rebel, CPointEntity);
 
-// specific to the local player
 BEGIN_SEND_TABLE_NOBASE(CHL2MP_Player, DT_HL2MPLocalPlayerExclusive)
-// send a hi-res origin to the local player for use in prediction
 SendPropVectorXY(SENDINFO(m_vecOrigin), -1, SPROP_NOSCALE | SPROP_CHANGES_OFTEN, 0.0f, HIGH_DEFAULT, SendProxy_OriginXY),
 SendPropFloat(SENDINFO_VECTORELEM(m_vecOrigin, 2), -1, SPROP_NOSCALE | SPROP_CHANGES_OFTEN, 0.0f, HIGH_DEFAULT, SendProxy_OriginZ),
 
@@ -57,9 +92,7 @@ SendPropAngle(SENDINFO_VECTORELEM(m_angEyeAngles, 1), 10, SPROP_CHANGES_OFTEN),
 
 END_SEND_TABLE()
 
-// all players except the local player
 BEGIN_SEND_TABLE_NOBASE(CHL2MP_Player, DT_HL2MPNonLocalPlayerExclusive)
-// send a lo-res origin to other players
 SendPropVectorXY(SENDINFO(m_vecOrigin), -1, SPROP_COORD_MP_LOWPRECISION | SPROP_CHANGES_OFTEN, 0.0f, HIGH_DEFAULT, SendProxy_OriginXY),
 SendPropFloat(SENDINFO_VECTORELEM(m_vecOrigin, 2), -1, SPROP_COORD_MP_LOWPRECISION | SPROP_CHANGES_OFTEN, 0.0f, HIGH_DEFAULT, SendProxy_OriginZ),
 
@@ -71,31 +104,23 @@ END_SEND_TABLE()
 IMPLEMENT_SERVERCLASS_ST(CHL2MP_Player, DT_HL2MP_Player)
 SendPropExclude("DT_BaseEntity", "m_vecOrigin"),
 
-// misyl:
-// m_flMaxspeed is fully predicted by the client and the client's
-// maxspeed is sent in the user message.
-// Other games like DOD, etc don't use this var at all and just fully
-// predict in GameMovement, but the HL2 codebase doesn't do that and modifies this
-// on the player.
-// So, just never send it, and don't predict it on the client either.
 SendPropExclude("DT_BasePlayer", "m_flMaxspeed"),
 
-
-// Data that only gets sent to the local player
 SendPropDataTable("hl2mplocaldata", 0, &REFERENCE_SEND_TABLE(DT_HL2MPLocalPlayerExclusive), SendProxy_SendLocalDataTable),
-
-// Data that gets sent to all other players
 SendPropDataTable("hl2mpnonlocaldata", 0, &REFERENCE_SEND_TABLE(DT_HL2MPNonLocalPlayerExclusive), SendProxy_SendNonLocalDataTable),
 
 SendPropEHandle(SENDINFO(m_hRagdoll)),
-SendPropInt(SENDINFO(m_iSpawnInterpCounter), 4),
-SendPropInt(SENDINFO(m_iPlayerSoundType), 3),
+SendPropInt(SENDINFO(m_iSpawnInterpCounter)),
+SendPropInt(SENDINFO(m_iPlayerSoundType)),
+
+// Downed state datatable network properties
+SendPropBool(SENDINFO(m_bIsDowned)),
+SendPropFloat(SENDINFO(m_flReviveProgress)),
+SendPropFloat(SENDINFO(m_flBleedoutTimer)),
+SendPropEHandle(SENDINFO(m_hRevivingTeammate)),
 
 SendPropExclude("DT_BaseAnimating", "m_flPoseParameter"),
 SendPropExclude("DT_BaseFlex", "m_viewtarget"),
-
-//	SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),	
-//	SendPropExclude( "DT_AnimTimeMustBeFirst" , "m_flAnimTime" ),	
 END_SEND_TABLE()
 
 BEGIN_DATADESC(CHL2MP_Player)
@@ -131,7 +156,6 @@ const char* g_ppszRandomCombineModels[] =
 	"models/police.mdl",
 };
 
-
 #define MAX_COMBINE_MODELS 4
 #define MODEL_CHANGE_INTERVAL 5.0f
 #define TEAM_CHANGE_INTERVAL 5.0f
@@ -154,9 +178,13 @@ CHL2MP_Player::CHL2MP_Player() : m_PlayerAnimState(this)
 	m_bEnterObserver = false;
 	m_bReady = false;
 
-	BaseClass::ChangeTeam(0);
+	m_bIsDowned = false;
+	m_flReviveProgress = 0.0f;
+	m_flBleedoutTimer = 0.0f;
+	m_hRevivingTeammate = NULL;
+	m_iDownedCount = 0;
 
-	//UseClientSideAnimation();
+	BaseClass::ChangeTeam(0);
 }
 
 CHL2MP_Player::~CHL2MP_Player(void)
@@ -181,14 +209,12 @@ void CHL2MP_Player::Precache(void)
 
 	PrecacheModel("sprites/glow01.vmt");
 
-	//Precache Citizen models
 	int nHeads = ARRAYSIZE(g_ppszRandomCitizenModels);
 	int i;
 
 	for (i = 0; i < nHeads; ++i)
 		PrecacheModel(g_ppszRandomCitizenModels[i]);
 
-	//Precache Combine Models
 	nHeads = ARRAYSIZE(g_ppszRandomCombineModels);
 
 	for (i = 0; i < nHeads; ++i)
@@ -236,25 +262,22 @@ void CHL2MP_Player::GiveAllItems(void)
 	GiveNamedItem("weapon_slam");
 
 	GiveNamedItem("weapon_physcannon");
-
 }
 
 void CHL2MP_Player::GiveDefaultItems(void)
 {
 	EquipSuit();
 
-	CBasePlayer::GiveAmmo(4, "FlareRound");
-
-	if (GetPlayerModelType() == PLAYER_SOUNDS_METROPOLICE || GetPlayerModelType() == PLAYER_SOUNDS_COMBINESOLDIER)
-	{
-		GiveNamedItem("weapon_crowbar");
-	}
-	else if (GetPlayerModelType() == PLAYER_SOUNDS_CITIZEN)
-	{
-		GiveNamedItem("weapon_crowbar");
-	}
-
+	GiveNamedItem("weapon_crowbar");
+	GiveNamedItem("weapon_medkit");
 	GiveNamedItem("weapon_flaregun");
+
+	CBasePlayer::GiveAmmo(4, "FlareRound");
+	CBasePlayer::GiveAmmo(25, "Scrap_Medical");
+	CBasePlayer::GiveAmmo(25, "Scrap_Weapon");
+	CBasePlayer::GiveAmmo(25, "Scrap_Utility");
+
+	GiveNamedItem("weapon_blueprint_medkit");
 
 	const char* szDefaultWeaponName = engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_defaultweapon");
 
@@ -266,7 +289,7 @@ void CHL2MP_Player::GiveDefaultItems(void)
 	}
 	else
 	{
-		Weapon_Switch(Weapon_OwnsThisType("weapon_physcannon"));
+		Weapon_Switch(Weapon_OwnsThisType("weapon_crowbar"));
 	}
 }
 
@@ -320,13 +343,18 @@ void CHL2MP_Player::PickDefaultSpawnTeam(void)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Sets HL2 specific defaults.
-//-----------------------------------------------------------------------------
 void CHL2MP_Player::Spawn(void)
 {
+	RegisterDownedConVars();
+
 	m_flNextModelChangeTime = 0.0f;
 	m_flNextTeamChangeTime = 0.0f;
+
+	m_bIsDowned = false;
+	m_flReviveProgress = 0.0f;
+	m_flBleedoutTimer = 0.0f;
+	m_hRevivingTeammate = NULL;
+	m_iDownedCount = 0;
 
 	PickDefaultSpawnTeam();
 
@@ -349,7 +377,7 @@ void CHL2MP_Player::Spawn(void)
 
 	m_Local.m_iHideHUD = 0;
 
-	AddFlag(FL_ONGROUND); // set the player on the ground at the start of the round.
+	AddFlag(FL_ONGROUND);
 
 	m_impactEnergyScale = HL2MPPLAYER_PHYSDAMAGE_SCALE;
 
@@ -401,10 +429,25 @@ ConVar hl2mp_allow_pickup("hl2mp_allow_pickup", "0", FCVAR_GAMEDLL);
 
 void CHL2MP_Player::PickupObject(CBaseEntity* pObject, bool bLimitMassAndSize)
 {
+	// Disallow grabbing objects with the USE key while downed
+	if (sv_downed_enable.GetBool() && m_bIsDowned)
+		return;
+
 	if (!hl2mp_allow_pickup.GetBool())
 		return;
 
 	return BaseClass::PickupObject(pObject, bLimitMassAndSize);
+}
+
+void CHL2MP_Player::PlayerRunCommand(CUserCmd* ucmd, IMoveHelper* moveHelper)
+{
+	// Intercept user commands directly before movement processing
+	if (sv_downed_enable.GetBool() && m_bIsDowned && ucmd)
+	{
+		ucmd->buttons &= ~IN_JUMP;
+	}
+
+	BaseClass::PlayerRunCommand(ucmd, moveHelper);
 }
 
 void CHL2MP_Player::SetPlayerTeamModel(void)
@@ -568,9 +611,11 @@ void CHL2MP_Player::ResetAnimation(void)
 	}
 }
 
-
 bool CHL2MP_Player::Weapon_Switch(CBaseCombatWeapon* pWeapon, int viewmodelindex)
 {
+	if (sv_downed_enable.GetBool() && m_bIsDowned)
+		return false;
+
 	bool bRet = BaseClass::Weapon_Switch(pWeapon, viewmodelindex);
 
 	if (bRet == true)
@@ -579,6 +624,91 @@ bool CHL2MP_Player::Weapon_Switch(CBaseCombatWeapon* pWeapon, int viewmodelindex
 	}
 
 	return bRet;
+}
+
+void CHL2MP_Player::DownPlayer(const CTakeDamageInfo& info)
+{
+	m_bIsDowned = true;
+	m_flReviveProgress = 0.0f;
+	m_flBleedoutTimer = 1.0f;
+	m_hRevivingTeammate = NULL;
+
+	m_iDownedCount++;
+
+	SetHealth(100);
+	AddFlag(FL_DUCKING);
+	SetViewOffset(VEC_DUCK_VIEW);
+
+	IGameEvent* event = gameeventmanager->CreateEvent("player_downed");
+	if (event)
+	{
+		event->SetInt("userid", GetUserID());
+		gameeventmanager->FireEvent(event);
+	}
+}
+
+void CHL2MP_Player::RevivePlayer(CHL2MP_Player* pReviver)
+{
+	m_bIsDowned = false;
+	m_flReviveProgress = 0.0f;
+	m_flBleedoutTimer = 0.0f;
+	m_hRevivingTeammate = NULL;
+
+	RemoveFlag(FL_DUCKING);
+	SetViewOffset(VEC_VIEW);
+	SetHealth(30);
+}
+
+void CHL2MP_Player::PlayerUse(void)
+{
+	// Block standard world/object interactions while downed
+	if (sv_downed_enable.GetBool() && m_bIsDowned)
+		return;
+
+	trace_t tr;
+	Vector forward;
+	EyeVectors(&forward);
+	Vector start = EyePosition();
+	Vector end = start + (forward * 72.0f);
+
+	UTIL_TraceLine(start, end, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
+
+	if (tr.m_pEnt && tr.m_pEnt->IsPlayer())
+	{
+		CHL2MP_Player* pTarget = ToHL2MPPlayer(tr.m_pEnt);
+
+		if (pTarget &&
+			sv_downed_enable.GetBool() &&
+			sv_downed_revive_enable.GetBool() &&
+			pTarget->IsDowned() &&
+			pTarget->GetTeamNumber() == GetTeamNumber())
+		{
+			// Mark active revive relationship
+			m_hRevivingTeammate = pTarget;
+			pTarget->m_hRevivingTeammate = this;
+
+			// Advance progress based on sv_downed_revive_duration ConVar
+			float flDuration = MAX(0.1f, sv_downed_revive_duration.GetFloat());
+			pTarget->m_flReviveProgress += (gpGlobals->frametime / flDuration);
+
+			if (pTarget->m_flReviveProgress >= 1.0f)
+			{
+				pTarget->RevivePlayer(this);
+				m_hRevivingTeammate = NULL;
+			}
+			return;
+		}
+	}
+
+	// If player is not looking at a downed teammate, clear any active revive link
+	if (m_hRevivingTeammate)
+	{
+		m_hRevivingTeammate->m_flReviveProgress = 0.0f;
+		m_hRevivingTeammate->m_hRevivingTeammate = NULL;
+		m_hRevivingTeammate = NULL;
+	}
+
+	BaseClass::PlayerUse();
 }
 
 void CHL2MP_Player::PreThink(void)
@@ -595,10 +725,95 @@ void CHL2MP_Player::PreThink(void)
 
 	SetLocalAngles(vTempAngles);
 
+	// If downed feature is disabled mid-game while downed, kill cleanly
+	if (!sv_downed_enable.GetBool() && m_bIsDowned)
+	{
+		m_bIsDowned = false;
+		m_hRevivingTeammate = NULL;
+		CBaseEntity* pWorld = CBaseEntity::Instance(0);
+		if (!pWorld)
+			pWorld = this;
+
+		CTakeDamageInfo fatalInfo(pWorld, pWorld, 1000.0f, DMG_GENERIC);
+		Event_Killed(fatalInfo);
+	}
+
+	// Handle Reviving State Freeze (Speed = 0, Attack = disabled)
+	if (sv_downed_enable.GetBool() && m_hRevivingTeammate != NULL)
+	{
+		SetMaxSpeed(0.001f);
+
+		bool bButtonReleased = !(m_nButtons & IN_USE);
+		bool bTooFar = EyePosition().DistTo(m_hRevivingTeammate->EyePosition()) > 96.0f;
+		bool bReviveTurnedOff = !sv_downed_revive_enable.GetBool();
+
+		if (bButtonReleased || bTooFar || bReviveTurnedOff)
+		{
+			m_hRevivingTeammate->m_flReviveProgress = 0.0f;
+			m_hRevivingTeammate->m_hRevivingTeammate = NULL;
+			m_hRevivingTeammate = NULL;
+		}
+	}
+
+	if (sv_downed_enable.GetBool() && m_bIsDowned && m_lifeState == LIFE_ALIVE)
+	{
+		// Forcefully strip ALL jump input buttons
+		m_nButtons &= ~IN_JUMP;
+		m_afButtonPressed &= ~IN_JUMP;
+		m_afButtonReleased &= ~IN_JUMP;
+
+		// Freeze speed to 0 if being actively revived, otherwise apply crawl speed
+		if (m_hRevivingTeammate != NULL)
+		{
+			SetMaxSpeed(0.001f);
+		}
+		else
+		{
+			SetMaxSpeed(sv_downed_speed.GetFloat());
+
+			// Only deplete bleedout timer if NOT currently being revived
+			float flEffectiveBleedoutTime = 30.0f;
+			switch (m_iDownedCount)
+			{
+			case 1:
+				flEffectiveBleedoutTime = sv_downed_time_1.GetFloat();
+				break;
+			case 2:
+				flEffectiveBleedoutTime = sv_downed_time_2.GetFloat();
+				break;
+			case 3:
+				flEffectiveBleedoutTime = sv_downed_time_3.GetFloat();
+				break;
+			case 4:
+				flEffectiveBleedoutTime = sv_downed_time_4.GetFloat();
+				break;
+			default:
+				flEffectiveBleedoutTime = sv_downed_time_5.GetFloat();
+				break;
+			}
+
+			flEffectiveBleedoutTime = MAX(1.0f, flEffectiveBleedoutTime);
+			m_flBleedoutTimer -= (gpGlobals->frametime / flEffectiveBleedoutTime);
+
+			if (m_flBleedoutTimer <= 0.0f)
+			{
+				m_flBleedoutTimer = 0.0f;
+				m_bIsDowned = false;
+				m_hRevivingTeammate = NULL;
+
+				CBaseEntity* pWorld = CBaseEntity::Instance(0);
+				if (!pWorld)
+					pWorld = this;
+
+				CTakeDamageInfo fatalInfo(pWorld, pWorld, 1000.0f, DMG_GENERIC);
+				Event_Killed(fatalInfo);
+			}
+		}
+	}
+
 	BaseClass::PreThink();
 	State_PreThink();
 
-	//Reset bullet force accumulator, only lasts one frame
 	m_vecTotalBulletForce = vec3_origin;
 	SetLocalAngles(vOldAngles);
 }
@@ -614,7 +829,6 @@ void CHL2MP_Player::PostThink(void)
 
 	m_PlayerAnimState.Update();
 
-	// Store the eye angles pitch so the client can compute its animation state correctly.
 	m_angEyeAngles = EyeAngles();
 
 	QAngle angles = GetLocalAngles();
@@ -630,9 +844,56 @@ void CHL2MP_Player::PlayerDeathThink()
 	}
 }
 
+void CHL2MP_Player::ItemPreFrame(void)
+{
+	if (GetFlags() & FL_FROZEN)
+		return;
+
+	if (sv_downed_enable.GetBool() && m_bIsDowned)
+	{
+		// Scrub attacks, reload, use, and jump inputs
+		m_nButtons &= ~(IN_ATTACK | IN_ATTACK2 | IN_RELOAD | IN_USE | IN_JUMP);
+		return;
+	}
+
+	// Block attacks while actively reviving a teammate
+	if (sv_downed_enable.GetBool() && m_hRevivingTeammate != NULL)
+	{
+		m_nButtons &= ~(IN_ATTACK | IN_ATTACK2);
+	}
+
+	if (m_nButtons & IN_ZOOM)
+	{
+		m_nButtons &= ~(IN_ATTACK | IN_ATTACK2);
+	}
+
+	BaseClass::ItemPreFrame();
+}
+
+void CHL2MP_Player::ItemPostFrame(void)
+{
+	if (GetFlags() & FL_FROZEN)
+		return;
+
+	if (sv_downed_enable.GetBool() && m_bIsDowned)
+	{
+		m_nButtons &= ~(IN_ATTACK | IN_ATTACK2 | IN_RELOAD | IN_USE | IN_JUMP);
+		return;
+	}
+
+	if (sv_downed_enable.GetBool() && m_hRevivingTeammate != NULL)
+	{
+		m_nButtons &= ~(IN_ATTACK | IN_ATTACK2);
+	}
+
+	BaseClass::ItemPostFrame();
+}
+
 void CHL2MP_Player::FireBullets(const FireBulletsInfo_t& info)
 {
-	// Move other players back to history positions based on local player's lag
+	if (sv_downed_enable.GetBool() && (m_bIsDowned || m_hRevivingTeammate != NULL))
+		return;
+
 	lagcompensation->StartLagCompensation(this, this->GetCurrentCommand());
 
 	FireBulletsInfo_t modinfo = info;
@@ -648,7 +909,6 @@ void CHL2MP_Player::FireBullets(const FireBulletsInfo_t& info)
 
 	BaseClass::FireBullets(modinfo);
 
-	// Move other players back to history positions based on local player's lag
 	lagcompensation->FinishLagCompensation(this);
 
 	if (pWeapon)
@@ -675,34 +935,27 @@ extern ConVar sv_maxunlag;
 
 bool CHL2MP_Player::WantsLagCompensationOnEntity(const CBasePlayer* pPlayer, const CUserCmd* pCmd, const CBitVec<MAX_EDICTS>* pEntityTransmitBits) const
 {
-	// No need to lag compensate at all if we're not attacking in this command and
-	// we haven't attacked recently.
 	if (!(pCmd->buttons & IN_ATTACK) && (pCmd->command_number - m_iLastWeaponFireUsercmd > 5))
 		return false;
 
-	// If this entity hasn't been transmitted to us and acked, then don't bother lag compensating it.
 	if (pEntityTransmitBits && !pEntityTransmitBits->Get(pPlayer->entindex()))
 		return false;
 
 	const Vector& vMyOrigin = GetAbsOrigin();
 	const Vector& vHisOrigin = pPlayer->GetAbsOrigin();
 
-	// get max distance player could have moved within max lag compensation time, 
-	// multiply by 1.5 to to avoid "dead zones"  (sqrt(2) would be the exact value)
 	float maxDistance = 1.5 * pPlayer->MaxSpeed() * sv_maxunlag.GetFloat();
 
-	// If the player is within this distance, lag compensate them in case they're running past us.
 	if (vHisOrigin.DistTo(vMyOrigin) < maxDistance)
 		return true;
 
-	// If their origin is not within a 45 degree cone in front of us, no need to lag compensate.
 	Vector vForward;
 	AngleVectors(pCmd->viewangles, &vForward);
 
 	Vector vDiff = vHisOrigin - vMyOrigin;
 	VectorNormalize(vDiff);
 
-	float flCosAngle = 0.707107f;	// 45 degree angle
+	float flCosAngle = 0.707107f;
 	if (vForward.Dot(vDiff) < flCosAngle)
 		return false;
 
@@ -728,7 +981,6 @@ Activity CHL2MP_Player::TranslateTeamActivity(Activity ActToTranslate)
 
 extern ConVar hl2_normspeed;
 
-// Set the activity based on an event or current state
 void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 {
 	int animDesired;
@@ -736,18 +988,6 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 	float speed;
 
 	speed = GetAbsVelocity().Length2D();
-
-
-	// bool bRunning = true;
-
-	//Revisit!
-/*	if ( ( m_nButtons & ( IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT ) ) )
-	{
-		if ( speed > 1.0f && speed < hl2_normspeed.GetFloat() - 20.0f )
-		{
-			bRunning = false;
-		}
-	}*/
 
 	if (GetFlags() & (FL_FROZEN | FL_ATCONTROLS))
 	{
@@ -757,7 +997,6 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 
 	Activity idealActivity = ACT_HL2MP_RUN;
 
-	// This could stand to be redone. Why is playerAnim abstracted from activity? (sjb)
 	if (playerAnim == PLAYER_JUMP)
 	{
 		idealActivity = ACT_HL2MP_JUMP;
@@ -790,19 +1029,10 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 	}
 	else if (playerAnim == PLAYER_IDLE || playerAnim == PLAYER_WALK)
 	{
-		if (!(GetFlags() & FL_ONGROUND) && GetActivity() == ACT_HL2MP_JUMP)	// Still jumping
+		if (!(GetFlags() & FL_ONGROUND) && GetActivity() == ACT_HL2MP_JUMP)
 		{
 			idealActivity = GetActivity();
 		}
-		/*
-		else if ( GetWaterLevel() > 1 )
-		{
-			if ( speed == 0 )
-				idealActivity = ACT_HOVER;
-			else
-				idealActivity = ACT_SWIM;
-		}
-		*/
 		else
 		{
 			if (GetFlags() & FL_DUCKING)
@@ -820,16 +1050,7 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 			{
 				if (speed > 0)
 				{
-					/*
-					if ( bRunning == false )
-					{
-						idealActivity = ACT_WALK;
-					}
-					else
-					*/
-					{
-						idealActivity = ACT_HL2MP_RUN;
-					}
+					idealActivity = ACT_HL2MP_RUN;
 				}
 				else
 				{
@@ -844,13 +1065,6 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 	if (idealActivity == ACT_HL2MP_GESTURE_RANGE_ATTACK)
 	{
 		RestartGesture(Weapon_TranslateActivity(idealActivity));
-
-		// FIXME: this seems a bit wacked
-		//
-		// misyl: it was and was causing a pred error every time.
-		// the weapons already call SendWeaponAnim with the right activity.
-		//Weapon_SetActivity( Weapon_TranslateActivity( ACT_RANGE_ATTACK1 ), 0 );
-
 		return;
 	}
 	else if (idealActivity == ACT_HL2MP_GESTURE_RELOAD)
@@ -874,7 +1088,6 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 			}
 		}
 
-		// Already using the desired animation?
 		if (GetSequence() == animDesired)
 			return;
 
@@ -884,28 +1097,23 @@ void CHL2MP_Player::SetAnimation(PLAYER_ANIM playerAnim)
 		return;
 	}
 
-	// Already using the desired animation?
 	if (GetSequence() == animDesired)
 		return;
 
-	//Msg( "Set animation to %d\n", animDesired );
-	// Reset to first frame of desired animation
 	ResetSequence(animDesired);
 	SetCycle(0);
 }
 
-
 extern int	gEvilImpulse101;
-//-----------------------------------------------------------------------------
-// Purpose: Player reacts to bumping a weapon. 
-// Input  : pWeapon - the weapon that the player bumped into.
-// Output : Returns true if player picked up the weapon
-//-----------------------------------------------------------------------------
+
 bool CHL2MP_Player::BumpWeapon(CBaseCombatWeapon* pWeapon)
 {
+	// Disallow picking up weapons while downed
+	if (sv_downed_enable.GetBool() && m_bIsDowned)
+		return false;
+
 	CBaseCombatCharacter* pOwner = pWeapon->GetOwner();
 
-	// Can I have this weapon type?
 	if (!IsAllowedToPickupWeapons())
 		return false;
 
@@ -918,7 +1126,6 @@ bool CHL2MP_Player::BumpWeapon(CBaseCombatWeapon* pWeapon)
 		return false;
 	}
 
-	// Don't let the player fetch weapons through walls (use MASK_SOLID so that you can't pickup through windows)
 	if (!pWeapon->FVisible(this, MASK_SOLID) && !(GetFlags() & FL_NOTARGET))
 	{
 		return false;
@@ -928,7 +1135,6 @@ bool CHL2MP_Player::BumpWeapon(CBaseCombatWeapon* pWeapon)
 
 	if (bOwnsWeaponAlready == true)
 	{
-		//If we have room for the ammo, then "take" the weapon too.
 		if (Weapon_EquipAmmoOnly(pWeapon))
 		{
 			pWeapon->CheckRespawn();
@@ -950,20 +1156,10 @@ bool CHL2MP_Player::BumpWeapon(CBaseCombatWeapon* pWeapon)
 
 void CHL2MP_Player::ChangeTeam(int iTeam)
 {
-	/*	if ( GetNextTeamChangeTime() >= gpGlobals->curtime )
-		{
-			char szReturnString[128];
-			Q_snprintf( szReturnString, sizeof( szReturnString ), "Please wait %d more seconds before trying to switch teams again.\n", (int)(GetNextTeamChangeTime() - gpGlobals->curtime) );
-
-			ClientPrint( this, HUD_PRINTTALK, szReturnString );
-			return;
-		}*/
-
 	bool bKill = false;
 
 	if (HL2MPRules()->IsTeamplay() != true && iTeam != TEAM_SPECTATOR)
 	{
-		//don't let them try to join combine or rebels during deathmatch.
 		iTeam = TEAM_UNASSIGNED;
 	}
 
@@ -1011,7 +1207,6 @@ bool CHL2MP_Player::HandleCommand_JoinTeam(int team)
 
 	if (team == TEAM_SPECTATOR)
 	{
-		// Prevent this is the cvar is set
 		if (!mp_allowspectators.GetInt() && !IsHLTV())
 		{
 			ClientPrint(this, HUD_PRINTCENTER, "#Cannot_Be_Spectator");
@@ -1020,11 +1215,10 @@ bool CHL2MP_Player::HandleCommand_JoinTeam(int team)
 
 		if (GetTeamNumber() != TEAM_UNASSIGNED && !IsDead())
 		{
-			m_fNextSuicideTime = gpGlobals->curtime;	// allow the suicide to work
+			m_fNextSuicideTime = gpGlobals->curtime;
 
 			CommitSuicide();
 
-			// add 1 to frags to balance out the 1 subtracted for killing yourself
 			IncrementFragCount(1);
 		}
 
@@ -1038,7 +1232,6 @@ bool CHL2MP_Player::HandleCommand_JoinTeam(int team)
 		State_Transition(STATE_ACTIVE);
 	}
 
-	// Switch their actual team...
 	ChangeTeam(team);
 
 	return true;
@@ -1050,7 +1243,6 @@ bool CHL2MP_Player::ClientCommand(const CCommand& args)
 	{
 		if (ShouldRunRateLimitedCommand(args))
 		{
-			// instantly join spectators
 			HandleCommand_JoinTeam(TEAM_SPECTATOR);
 		}
 		return true;
@@ -1105,7 +1297,6 @@ bool CHL2MP_Player::ShouldRunRateLimitedCommand(const CCommand& args)
 	}
 	else if ((gpGlobals->curtime - m_RateLimitLastCommandTimes[i]) < HL2MP_COMMAND_MAX_RATE)
 	{
-		// Too fast.
 		return false;
 	}
 	else
@@ -1139,27 +1330,19 @@ bool CHL2MP_Player::BecomeRagdollOnClient(const Vector& force)
 	return true;
 }
 
-// -------------------------------------------------------------------------------- //
-// Ragdoll entities.
-// -------------------------------------------------------------------------------- //
-
 class CHL2MPRagdoll : public CBaseAnimatingOverlay
 {
 public:
 	DECLARE_CLASS(CHL2MPRagdoll, CBaseAnimatingOverlay);
 	DECLARE_SERVERCLASS();
 
-	// Transmit ragdolls to everyone.
 	virtual int UpdateTransmitState()
 	{
 		return SetTransmitState(FL_EDICT_ALWAYS);
 	}
 
 public:
-	// In case the client has the player entity, we transmit the player index.
-	// In case the client doesn't have it, we transmit the player's model index, origin, and angles
-	// so they can create a ragdoll in the right place.
-	CNetworkHandle(CBaseEntity, m_hPlayer);	// networked entity handle 
+	CNetworkHandle(CBaseEntity, m_hPlayer);
 	CNetworkVector(m_vecRagdollVelocity);
 	CNetworkVector(m_vecRagdollOrigin);
 };
@@ -1175,7 +1358,6 @@ SendPropVector(SENDINFO(m_vecForce), -1, SPROP_NOSCALE),
 SendPropVector(SENDINFO(m_vecRagdollVelocity))
 END_SEND_TABLE()
 
-
 void CHL2MP_Player::CreateRagdollEntity(void)
 {
 	if (m_hRagdoll)
@@ -1184,12 +1366,10 @@ void CHL2MP_Player::CreateRagdollEntity(void)
 		m_hRagdoll = NULL;
 	}
 
-	// If we already have a ragdoll, don't make another one.
 	CHL2MPRagdoll* pRagdoll = dynamic_cast<CHL2MPRagdoll*>(m_hRagdoll.Get());
 
 	if (!pRagdoll)
 	{
-		// create a new one
 		pRagdoll = dynamic_cast<CHL2MPRagdoll*>(CreateEntityByName("hl2mp_ragdoll"));
 	}
 
@@ -1204,12 +1384,9 @@ void CHL2MP_Player::CreateRagdollEntity(void)
 		pRagdoll->SetAbsOrigin(GetAbsOrigin());
 	}
 
-	// ragdolls will be removed on round restart automatically
 	m_hRagdoll = pRagdoll;
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 int CHL2MP_Player::FlashlightIsOn(void)
 {
 	return IsEffectActive(EF_DIMLIGHT);
@@ -1217,8 +1394,6 @@ int CHL2MP_Player::FlashlightIsOn(void)
 
 extern ConVar flashlight;
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 void CHL2MP_Player::FlashlightTurnOn(void)
 {
 	if (flashlight.GetInt() > 0 && IsAlive())
@@ -1228,9 +1403,6 @@ void CHL2MP_Player::FlashlightTurnOn(void)
 	}
 }
 
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 void CHL2MP_Player::FlashlightTurnOff(void)
 {
 	RemoveEffects(EF_DIMLIGHT);
@@ -1243,7 +1415,6 @@ void CHL2MP_Player::FlashlightTurnOff(void)
 
 void CHL2MP_Player::Weapon_Drop(CBaseCombatWeapon* pWeapon, const Vector* pvecTarget, const Vector* pVelocity)
 {
-	//Drop a grenade if it's primed.
 	if (GetActiveWeapon())
 	{
 		CBaseCombatWeapon* pGrenade = Weapon_OwnsThisType("weapon_frag");
@@ -1285,20 +1456,22 @@ void CHL2MP_Player::DetonateTripmines(void)
 		}
 	}
 
-	// Play sound for pressing the detonator
 	EmitSound("Weapon_SLAM.SatchelDetonate");
 }
 
 void CHL2MP_Player::Event_Killed(const CTakeDamageInfo& info)
 {
-	//update damage info with our accumulated physics force
+	m_bIsDowned = false;
+	m_flBleedoutTimer = 0.0f;
+	m_flReviveProgress = 0.0f;
+	m_hRevivingTeammate = NULL;
+	m_iDownedCount = 0;
+
 	CTakeDamageInfo subinfo = info;
 	subinfo.SetDamageForce(m_vecTotalBulletForce);
 
 	SetNumAnimOverlays(0);
 
-	// Note: since we're dead, it won't draw us on the client, but we don't set EF_NODRAW
-	// because we still want to transmit to the clients in our PVS.
 	CreateRagdollEntity();
 
 	DetonateTripmines();
@@ -1331,19 +1504,27 @@ void CHL2MP_Player::Event_Killed(const CTakeDamageInfo& info)
 
 	m_lifeState = LIFE_DEAD;
 
-	RemoveEffects(EF_NODRAW);	// still draw player body
+	RemoveEffects(EF_NODRAW);
 	StopZooming();
 }
 
 int CHL2MP_Player::OnTakeDamage(const CTakeDamageInfo& inputInfo)
 {
-	//return here if the player is in the respawn grace period vs. slams.
 	if (gpGlobals->curtime < m_flSlamProtectTime && (inputInfo.GetDamageType() == DMG_BLAST))
 		return 0;
 
 	m_vecTotalBulletForce += inputInfo.GetDamageForce();
 
 	gamestats->Event_PlayerDamage(this, inputInfo);
+
+	if (sv_downed_enable.GetBool() && !m_bIsDowned && m_lifeState == LIFE_ALIVE)
+	{
+		if ((GetHealth() - inputInfo.GetDamage()) <= 0)
+		{
+			DownPlayer(inputInfo);
+			return 0;
+		}
+	}
 
 	return BaseClass::OnTakeDamage(inputInfo);
 }
@@ -1408,10 +1589,10 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint(void)
 	}
 
 	pSpot = pLastSpawnPoint;
-	// Randomize the start spot
+
 	for (int i = random->RandomInt(1, 5); i > 0; i--)
 		pSpot = gEntList.FindEntityByClassname(pSpot, pSpawnpointName);
-	if (!pSpot)  // skip over the null point
+	if (!pSpot)
 		pSpot = gEntList.FindEntityByClassname(pSpot, pSpawnpointName);
 
 	CBaseEntity* pFirstSpot = pSpot;
@@ -1420,7 +1601,6 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint(void)
 	{
 		if (pSpot)
 		{
-			// check if pSpot is valid
 			if (g_pGameRules->IsSpawnPointValid(pSpot, this))
 			{
 				if (pSpot->GetLocalOrigin() == vec3_origin)
@@ -1429,21 +1609,18 @@ CBaseEntity* CHL2MP_Player::EntSelectSpawnPoint(void)
 					continue;
 				}
 
-				// if so, go to pSpot
 				goto ReturnSpot;
 			}
 		}
-		// increment pSpot
-		pSpot = gEntList.FindEntityByClassname(pSpot, pSpawnpointName);
-	} while (pSpot != pFirstSpot); // loop if we're not back to the start
 
-	// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
+		pSpot = gEntList.FindEntityByClassname(pSpot, pSpawnpointName);
+	} while (pSpot != pFirstSpot);
+
 	if (pSpot)
 	{
 		CBaseEntity* ent = NULL;
 		for (CEntitySphereQuery sphere(pSpot->GetAbsOrigin(), hl2mp_spawn_frag_fallback_radius.GetFloat()); (ent = sphere.GetCurrentEntity()) != NULL; sphere.NextEntity())
 		{
-			// if ent is a client, kill em (unless they are ourselves)
 			if (ent->IsPlayer() && !(ent->edict() == player))
 				ent->TakeDamage(CTakeDamageInfo(GetContainingEntity(INDEXENT(0)), GetContainingEntity(INDEXENT(0)), 300, DMG_GENERIC));
 		}
@@ -1478,7 +1655,6 @@ ReturnSpot:
 
 	return pSpot;
 }
-
 
 CON_COMMAND(timeleft, "prints the time remaining in the match")
 {
@@ -1520,6 +1696,25 @@ CON_COMMAND(timeleft, "prints the time remaining in the match")
 	}
 }
 
+CON_COMMAND(revive_self, "Instantly revives the local player from the downed state (requires sv_cheats 1).")
+{
+	if (!sv_cheats->GetBool())
+	{
+		Msg("revive_self requires sv_cheats set to 1.\n");
+		return;
+	}
+
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (pPlayer && pPlayer->IsDowned())
+	{
+		pPlayer->RevivePlayer(pPlayer);
+		ClientPrint(pPlayer, HUD_PRINTTALK, "You have been revived by debug command.");
+	}
+	else
+	{
+		Msg("You must be in a downed state to use revive_self.\n");
+	}
+}
 
 void CHL2MP_Player::Reset()
 {
@@ -1539,22 +1734,17 @@ void CHL2MP_Player::SetReady(bool bReady)
 
 void CHL2MP_Player::CheckChatText(char* p, int bufsize)
 {
-	//Look for escape sequences and replace
-
 	char* buf = new char[bufsize];
 	int pos = 0;
 
-	// Parse say text for escape sequences
 	for (char* pSrc = p; pSrc != NULL && *pSrc != 0 && pos < bufsize - 1; pSrc++)
 	{
-		// copy each char across
 		buf[pos] = *pSrc;
 		pos++;
 	}
 
 	buf[pos] = '\0';
 
-	// copy buf back into p
 	Q_strncpy(p, buf, bufsize);
 
 	delete[] buf;
@@ -1570,17 +1760,14 @@ void CHL2MP_Player::State_Transition(HL2MPPlayerState newState)
 	State_Enter(newState);
 }
 
-
 void CHL2MP_Player::State_Enter(HL2MPPlayerState newState)
 {
 	m_iPlayerState = newState;
 	m_pCurStateInfo = State_LookupInfo(newState);
 
-	// Initialize the new state.
 	if (m_pCurStateInfo && m_pCurStateInfo->pfnEnterState)
 		(this->*m_pCurStateInfo->pfnEnterState)();
 }
-
 
 void CHL2MP_Player::State_Leave()
 {
@@ -1590,7 +1777,6 @@ void CHL2MP_Player::State_Leave()
 	}
 }
 
-
 void CHL2MP_Player::State_PreThink()
 {
 	if (m_pCurStateInfo && m_pCurStateInfo->pfnPreThink)
@@ -1599,10 +1785,8 @@ void CHL2MP_Player::State_PreThink()
 	}
 }
 
-
 CHL2MPPlayerStateInfo* CHL2MP_Player::State_LookupInfo(HL2MPPlayerState state)
 {
-	// This table MUST match the 
 	static CHL2MPPlayerStateInfo playerStateInfos[] =
 	{
 		{ STATE_ACTIVE,			"STATE_ACTIVE",			&CHL2MP_Player::State_Enter_ACTIVE, NULL, &CHL2MP_Player::State_PreThink_ACTIVE },
@@ -1620,7 +1804,6 @@ CHL2MPPlayerStateInfo* CHL2MP_Player::State_LookupInfo(HL2MPPlayerState state)
 
 bool CHL2MP_Player::StartObserverMode(int mode)
 {
-	//we only want to go into observer mode if the player asked to, not on a death timeout
 	if (m_bEnterObserver == true)
 	{
 		VPhysicsDestroyObject();
@@ -1656,50 +1839,32 @@ void CHL2MP_Player::State_Enter_OBSERVER_MODE()
 
 void CHL2MP_Player::State_PreThink_OBSERVER_MODE()
 {
-	// Make sure nobody has changed any of our state.
-	//	Assert( GetMoveType() == MOVETYPE_FLY );
 	Assert(m_takedamage == DAMAGE_NO);
 	Assert(IsSolidFlagSet(FSOLID_NOT_SOLID));
-	//	Assert( IsEffectActive( EF_NODRAW ) );
 
-	// Must be dead.
 	Assert(m_lifeState == LIFE_DEAD);
 	Assert(pl.deadflag);
 }
-
 
 void CHL2MP_Player::State_Enter_ACTIVE()
 {
 	SetMoveType(MOVETYPE_WALK);
 
-	// md 8/15/07 - They'll get set back to solid when they actually respawn. If we set them solid now and mp_forcerespawn
-	// is false, then they'll be spectating but blocking live players from moving.
-	// RemoveSolidFlags( FSOLID_NOT_SOLID );
-
 	m_Local.m_iHideHUD = 0;
 }
 
-
 void CHL2MP_Player::State_PreThink_ACTIVE()
 {
-	//we don't really need to do anything here. 
-	//This state_prethink structure came over from CS:S and was doing an assert check that fails the way hl2dm handles death
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
 bool CHL2MP_Player::CanHearAndReadChatFrom(CBasePlayer* pPlayer)
 {
-	// can always hear the console unless we're ignoring all chat
 	if (!pPlayer)
 		return false;
 
 	return true;
 }
 
-//-----------------------------------------------------------------------------------------------------
-// Return true if the given threat is aiming in our direction
 bool CHL2MP_Player::IsThreatAimingTowardMe(CBaseEntity* threat, float cosTolerance) const
 {
 	CHL2MP_Player* player = ToHL2MPPlayer(threat);
@@ -1711,7 +1876,6 @@ bool CHL2MP_Player::IsThreatAimingTowardMe(CBaseEntity* threat, float cosToleran
 		return false;
 	}
 
-	// is the player pointing at me?
 	player->EyeVectors(&forward);
 
 	if (DotProduct(to, forward) > cosTolerance)
@@ -1722,8 +1886,6 @@ bool CHL2MP_Player::IsThreatAimingTowardMe(CBaseEntity* threat, float cosToleran
 	return false;
 }
 
-//-----------------------------------------------------------------------------------------------------
-// Return true if the given threat is aiming in our direction and firing its weapon
 bool CHL2MP_Player::IsThreatFiringAtMe(CBaseEntity* threat) const
 {
 	if (IsThreatAimingTowardMe(threat))
@@ -1737,4 +1899,82 @@ bool CHL2MP_Player::IsThreatFiringAtMe(CBaseEntity* threat) const
 	}
 
 	return false;
+}
+
+//DROPPING
+CON_COMMAND(drop, "Drops the currently held weapon.")
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer)
+		return;
+
+	CBaseCombatWeapon* pWeapon = pPlayer->GetActiveWeapon();
+	if (!pWeapon)
+		return;
+
+	// Check drop exception rule
+	CBaseHL2MPCombatWeapon* pHLEWpn = dynamic_cast<CBaseHL2MPCombatWeapon*>(pWeapon);
+	if (pHLEWpn && !pHLEWpn->CanBeDropped())
+	{
+		ClientPrint(pPlayer, HUD_PRINTCONSOLE, "This weapon cannot be dropped.\n");
+		return;
+	}
+
+	// Apply forward velocity and drop
+	Vector vecForward;
+	pPlayer->EyeVectors(&vecForward);
+	Vector vecVelocity = vecForward * 100.0f + Vector(0, 0, 50.0f);
+
+	pPlayer->Weapon_Drop(pWeapon, &vecVelocity);
+}
+CON_COMMAND(dropammo, "Drops a clip of ammo for the currently held weapon.")
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer)
+		return;
+
+	CBaseCombatWeapon* pWeapon = pPlayer->GetActiveWeapon();
+	if (!pWeapon)
+	{
+		ClientPrint(pPlayer, HUD_PRINTCONSOLE, "You must be holding a weapon to drop ammo.\n");
+		return;
+	}
+
+	int iAmmoType = pWeapon->GetPrimaryAmmoType();
+	if (iAmmoType <= 0)
+	{
+		ClientPrint(pPlayer, HUD_PRINTCONSOLE, "This weapon does not use primary ammo.\n");
+		return;
+	}
+
+	int iCurrentAmmo = pPlayer->GetAmmoCount(iAmmoType);
+	int iDropAmount = pWeapon->GetDefaultClip1(); // Drop one clip's worth, or fallback to 10
+	if (iDropAmount <= 0)
+		iDropAmount = 10;
+
+	if (iCurrentAmmo < iDropAmount)
+	{
+		ClientPrint(pPlayer, HUD_PRINTCONSOLE, "Not enough ammo to drop.\n");
+		return;
+	}
+
+	// Remove ammo from player's inventory
+	pPlayer->RemoveAmmo(iDropAmount, iAmmoType);
+
+	// Spawn a dropped ammo packet in front of the player
+	Vector vecForward;
+	pPlayer->EyeVectors(&vecForward);
+	Vector vecSrc = pPlayer->Weapon_ShootPosition() + vecForward * 32.0f;
+	Vector vecVelocity = vecForward * 100.0f + Vector(0, 0, 50.0f);
+
+	// You can spawn a generic item or map it to your mod's ammo entity classnames
+	CBaseEntity* pAmmoDrop = CreateEntityByName("item_ammo_crate"); // Or a custom ammo drop entity
+	if (pAmmoDrop)
+	{
+		pAmmoDrop->SetAbsOrigin(vecSrc);
+		pAmmoDrop->SetAbsVelocity(vecVelocity);
+		DispatchSpawn(pAmmoDrop);
+	}
+
+	ClientPrint(pPlayer, HUD_PRINTCONSOLE, "Dropped ammo.\n");
 }

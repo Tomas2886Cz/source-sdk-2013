@@ -1,19 +1,22 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================//
-
 #ifndef GRENADE_SMOKE_H
 #define GRENADE_SMOKE_H
 #pragma once
 
-class CBaseGrenade;
-struct edict_t;
+#include "basegrenade_shared.h"
 
-CBaseGrenade* Smokegrenade_Create(const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, CBaseEntity* pOwner, float timer, bool combineSpawned);
-bool	Smokegrenade_WasPunted(const CBaseEntity* pEntity);
-bool	Smokegrenade_WasCreatedByCombine(const CBaseEntity* pEntity);
+class CSmokeGrenadeProjectile : public CBaseGrenade
+{
+	DECLARE_CLASS(CSmokeGrenadeProjectile, CBaseGrenade);
+	DECLARE_DATADESC();
+
+public:
+	void Spawn(void);
+	void Precache(void);
+	void Detonate(void);
+	void BounceSound(void);
+	void SmokeTouch(CBaseEntity* pOther);
+
+	static CSmokeGrenadeProjectile* Create(const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, CBaseEntity* pOwner, float timer);
+};
 
 #endif // GRENADE_SMOKE_H

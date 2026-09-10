@@ -1183,7 +1183,7 @@ void C_BasePlayer::DetermineVguiInputMode( CUserCmd *pCmd )
 //-----------------------------------------------------------------------------
 // Purpose: Input handling
 //-----------------------------------------------------------------------------
-bool C_BasePlayer::CreateMove( float flInputSampleTime, CUserCmd *pCmd )
+bool C_BasePlayer::CreateMove( float flInputSampleTime, CUserCmd *pCmd )	
 {
 	// Allow the vehicle to clamp the view angles
 	if ( IsInAVehicle() )

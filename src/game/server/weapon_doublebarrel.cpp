@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose: Shotgun implementation that locks firing states until reload finishes completely.
 //
 //=============================================================================//
 
@@ -53,7 +53,6 @@ public:
 	void FinishReload(void);
 	void CheckHolsterReload(void);
 	void Pump(void);
-	//	void WeaponIdle( void );
 	void ItemHolsterFrame(void);
 	void ItemPostFrame(void);
 	void PrimaryAttack(void);
@@ -111,16 +110,11 @@ acttable_t	CWeaponDoubleBarrel::m_acttable[] =
 	{ ACT_HL2MP_JUMP,					ACT_HL2MP_JUMP_SHOTGUN,					false },
 	{ ACT_RANGE_ATTACK1,				ACT_RANGE_ATTACK_SHOTGUN,				false },
 };
-
 IMPLEMENT_ACTTABLE(CWeaponDoubleBarrel);
-
 #endif
 
-
 //-----------------------------------------------------------------------------
-// Purpose: Override so only reload one shell at a time
-// Input  :
-// Output :
+// Purpose: Starts single shell insertion pass
 //-----------------------------------------------------------------------------
 bool CWeaponDoubleBarrel::StartReload(void)
 {
@@ -128,7 +122,6 @@ bool CWeaponDoubleBarrel::StartReload(void)
 		return false;
 
 	CBaseCombatCharacter* pOwner = GetOwner();
-
 	if (pOwner == NULL)
 		return false;
 
@@ -138,16 +131,12 @@ bool CWeaponDoubleBarrel::StartReload(void)
 	if (m_iClip1 >= GetMaxClip1())
 		return false;
 
-
 	int j = MIN(1, pOwner->GetAmmoCount(m_iPrimaryAmmoType));
-
 	if (j <= 0)
 		return false;
 
 	SendWeaponAnim(ACT_SHOTGUN_RELOAD_START);
-
-	// Make shotgun shell visible
-	SetBodygroup(1, 0);
+	SetBodygroup(1, 0); // Make shell visible
 
 	pOwner->m_flNextAttack = gpGlobals->curtime;
 	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
@@ -157,20 +146,16 @@ bool CWeaponDoubleBarrel::StartReload(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Override so only reload one shell at a time
-// Input  :
-// Output :
+// Purpose: Iterates incremental shell fills
 //-----------------------------------------------------------------------------
 bool CWeaponDoubleBarrel::Reload(void)
 {
-	// Check that StartReload was called first
 	if (!m_bInReload)
 	{
 		Warning("ERROR: Shotgun Reload called incorrectly!\n");
 	}
 
 	CBaseCombatCharacter* pOwner = GetOwner();
-
 	if (pOwner == NULL)
 		return false;
 
@@ -181,12 +166,10 @@ bool CWeaponDoubleBarrel::Reload(void)
 		return false;
 
 	int j = MIN(1, pOwner->GetAmmoCount(m_iPrimaryAmmoType));
-
 	if (j <= 0)
 		return false;
 
 	FillClip();
-	// Play reload on different channel as otherwise steals channel away from fire sound
 	WeaponSound(RELOAD);
 	SendWeaponAnim(ACT_VM_RELOAD);
 
@@ -197,23 +180,17 @@ bool CWeaponDoubleBarrel::Reload(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Play finish reload anim and fill clip
-// Input  :
-// Output :
+// Purpose: Play finish reload animation and close the chamber
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::FinishReload(void)
 {
-	// Make shotgun shell invisible
-	SetBodygroup(1, 1);
+	SetBodygroup(1, 1); // Hide shell matching closed chamber geometry
 
 	CBaseCombatCharacter* pOwner = GetOwner();
-
 	if (pOwner == NULL)
 		return;
 
 	m_bInReload = false;
-
-	// Finish reload animation
 	SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH);
 
 	pOwner->m_flNextAttack = gpGlobals->curtime;
@@ -221,18 +198,14 @@ void CWeaponDoubleBarrel::FinishReload(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Play finish reload anim and fill clip
-// Input  :
-// Output :
+// Purpose: Transports ammo pool units to internal magazine clip
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::FillClip(void)
 {
 	CBaseCombatCharacter* pOwner = GetOwner();
-
 	if (pOwner == NULL)
 		return;
 
-	// Add them to the clip
 	if (pOwner->GetAmmoCount(m_iPrimaryAmmoType) > 0)
 	{
 		if (Clip1() < GetMaxClip1())
@@ -244,14 +217,11 @@ void CWeaponDoubleBarrel::FillClip(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Play weapon pump anim
-// Input  :
-// Output :
+// Purpose: Cycles action mechanical pump sequence
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::Pump(void)
 {
 	CBaseCombatCharacter* pOwner = GetOwner();
-
 	if (pOwner == NULL)
 		return;
 
@@ -264,18 +234,13 @@ void CWeaponDoubleBarrel::Pump(void)
 	}
 
 	WeaponSound(SPECIAL1);
-
-	// Finish reload animation
 	SendWeaponAnim(ACT_SHOTGUN_PUMP);
 
 	pOwner->m_flNextAttack = gpGlobals->curtime + SequenceDuration();
 	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
 }
-
 //-----------------------------------------------------------------------------
-// Purpose: 
-//
-//
+// Purpose: dry fire audio responses
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::DryFire(void)
 {
@@ -286,41 +251,31 @@ void CWeaponDoubleBarrel::DryFire(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//
-//
+// Purpose: Primary Firing Actions
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::PrimaryAttack(void)
 {
-	// Only the player fires this way so we can cast
 	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
-
-	if (!pPlayer)
+	if (!pPlayer || m_bInReload) // LOCKED: Prevent firing mid-reload sequence
 	{
 		return;
 	}
 
-	// MUST call sound before removing a round from the clip of a CMachineGun
 	WeaponSound(SINGLE);
-
 	pPlayer->DoMuzzleFlash();
-
 	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
 
-	// Don't fire again until fire animation has completed
 	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
 	m_iClip1 -= 1;
 
-	// player "shoot" animation
 	pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	Vector	vecSrc = pPlayer->Weapon_ShootPosition();
-	Vector	vecAiming = pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
+	Vector vecSrc = pPlayer->Weapon_ShootPosition();
+	Vector vecAiming = pPlayer->GetAutoaimVector(AUTOAIM_SCALE_DEFAULT);
 
 	FireBulletsInfo_t info(20, vecSrc, vecAiming, GetBulletSpread(), MAX_TRACE_LENGTH, m_iPrimaryAmmoType);
 	info.m_pAttacker = pPlayer;
 
-	// Fire the bullets, and force the first shot to be perfectly accuracy
 	pPlayer->FireBullets(info);
 
 	QAngle punch;
@@ -329,7 +284,6 @@ void CWeaponDoubleBarrel::PrimaryAttack(void)
 
 	if (!m_iClip1 && pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 	{
-		// HEV suit - indicate out of ammo condition
 		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 	}
 
@@ -337,48 +291,37 @@ void CWeaponDoubleBarrel::PrimaryAttack(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-//
-//
+// Purpose: Secondary Fire Attack Logic
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::SecondaryAttack(void)
 {
-	// Only the player fires this way so we can cast
 	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
-
-	if (!pPlayer)
+	if (!pPlayer || m_bInReload) // LOCKED: Prevent firing mid-reload sequence
 	{
 		return;
 	}
 
 	pPlayer->m_nButtons &= ~IN_ATTACK2;
-	// MUST call sound before removing a round from the clip of a CMachineGun
 	WeaponSound(WPN_DOUBLE);
-
 	pPlayer->DoMuzzleFlash();
-
 	SendWeaponAnim(ACT_VM_SECONDARYATTACK);
 
-	// Don't fire again until fire animation has completed
 	m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
-	m_iClip1 -= 2;	// Shotgun uses same clip for primary and secondary attacks
+	m_iClip1 -= 2;
 
-	// player "shoot" animation
 	pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 	Vector vecSrc = pPlayer->Weapon_ShootPosition();
-	Vector vecAiming = pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
+	Vector vecAiming = pPlayer->GetAutoaimVector(AUTOAIM_SCALE_DEFAULT);
 
 	FireBulletsInfo_t info(12, vecSrc, vecAiming, GetBulletSpread(), MAX_TRACE_LENGTH, m_iPrimaryAmmoType);
 	info.m_pAttacker = pPlayer;
 
-	// Fire the bullets, and force the first shot to be perfectly accuracy
 	pPlayer->FireBullets(info);
 	pPlayer->ViewPunch(QAngle(SharedRandomFloat("shotgunpax", -20, 20), SharedRandomFloat("shotgunpay", -20, 20), 0));
 
 	if (!m_iClip1 && pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 	{
-		// HEV suit - indicate out of ammo condition
 		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 	}
 
@@ -386,7 +329,7 @@ void CWeaponDoubleBarrel::SecondaryAttack(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Override so shotgun can do mulitple reloads in a row
+// Purpose: Frame calculation loops containing updated input gate logic
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::ItemPostFrame(void)
 {
@@ -403,35 +346,20 @@ void CWeaponDoubleBarrel::ItemPostFrame(void)
 
 	if (m_bInReload)
 	{
-		// If I'm primary firing and have one round stop reloading and fire
-		if ((pOwner->m_nButtons & IN_ATTACK) && (m_iClip1 >= 1) && !m_bNeedPump)
+		// FIXED: Removed the early breakout blocks that used to let IN_ATTACK 
+		// and IN_ATTACK2 interrupt the active reload cycle.
+		if (m_flNextPrimaryAttack <= gpGlobals->curtime)
 		{
-			m_bInReload = false;
-			m_bNeedPump = false;
-			m_bDelayedFire1 = true;
-		}
-		// If I'm secondary firing and have two rounds stop reloading and fire
-		else if ((pOwner->m_nButtons & IN_ATTACK2) && (m_iClip1 >= 2) && !m_bNeedPump)
-		{
-			m_bInReload = false;
-			m_bNeedPump = false;
-			m_bDelayedFire2 = true;
-		}
-		else if (m_flNextPrimaryAttack <= gpGlobals->curtime)
-		{
-			// If out of ammo end reload
 			if (pOwner->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 			{
 				FinishReload();
 				return;
 			}
-			// If clip not full reload again
 			if (m_iClip1 < GetMaxClip1())
 			{
 				Reload();
 				return;
 			}
-			// Clip full, stop reloading
 			else
 			{
 				FinishReload();
@@ -441,8 +369,7 @@ void CWeaponDoubleBarrel::ItemPostFrame(void)
 	}
 	else
 	{
-		// Make shotgun shell invisible
-		SetBodygroup(1, 1);
+		SetBodygroup(1, 1); // Close shell chamber
 	}
 
 	if ((m_bNeedPump) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
@@ -451,91 +378,84 @@ void CWeaponDoubleBarrel::ItemPostFrame(void)
 		return;
 	}
 
-	// Shotgun uses same timing and ammo for secondary attack
-	if ((m_bDelayedFire2 || pOwner->m_nButtons & IN_ATTACK2) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
+	// BLOCKED: Firing checks will only execute if m_bInReload is completely false
+	if (!m_bInReload)
 	{
-		m_bDelayedFire2 = false;
-
-		if ((m_iClip1 <= 1 && UsesClipsForAmmo1()))
+		if ((m_bDelayedFire2 || pOwner->m_nButtons & IN_ATTACK2) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
 		{
-			// If only one shell is left, do a single shot instead	
-			if (m_iClip1 == 1)
+			m_bDelayedFire2 = false;
+
+			if ((m_iClip1 <= 1 && UsesClipsForAmmo1()))
 			{
+				if (m_iClip1 == 1)
+				{
+					PrimaryAttack();
+				}
+				else if (!pOwner->GetAmmoCount(m_iPrimaryAmmoType))
+				{
+					DryFire();
+				}
+				else
+				{
+					StartReload();
+				}
+			}
+			else if (GetOwner()->GetWaterLevel() == 3 && m_bFiresUnderwater == false)
+			{
+				WeaponSound(EMPTY);
+				m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
+				return;
+			}
+			else
+			{
+				if (pOwner->m_afButtonPressed & IN_ATTACK2)
+				{
+					m_flNextPrimaryAttack = gpGlobals->curtime;
+				}
+				SecondaryAttack();
+			}
+		}
+		else if ((m_bDelayedFire1 || pOwner->m_nButtons & IN_ATTACK) && m_flNextPrimaryAttack <= gpGlobals->curtime)
+		{
+			m_bDelayedFire1 = false;
+			if ((m_iClip1 <= 0 && UsesClipsForAmmo1()) || (!UsesClipsForAmmo1() && !pOwner->GetAmmoCount(m_iPrimaryAmmoType)))
+			{
+				if (!pOwner->GetAmmoCount(m_iPrimaryAmmoType))
+				{
+					DryFire();
+				}
+				else
+				{
+					StartReload();
+				}
+			}
+			else if (pOwner->GetWaterLevel() == 3 && m_bFiresUnderwater == false)
+			{
+				WeaponSound(EMPTY);
+				m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
+				return;
+			}
+			else
+			{
+				if (pOwner->m_afButtonPressed & IN_ATTACK)
+				{
+					m_flNextPrimaryAttack = gpGlobals->curtime;
+				}
 				PrimaryAttack();
 			}
-			else if (!pOwner->GetAmmoCount(m_iPrimaryAmmoType))
-			{
-				DryFire();
-			}
-			else
-			{
-				StartReload();
-			}
-		}
-
-		// Fire underwater?
-		else if (GetOwner()->GetWaterLevel() == 3 && m_bFiresUnderwater == false)
-		{
-			WeaponSound(EMPTY);
-			m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
-			return;
-		}
-		else
-		{
-			// If the firing button was just pressed, reset the firing time
-			if (pOwner->m_afButtonPressed & IN_ATTACK)
-			{
-				m_flNextPrimaryAttack = gpGlobals->curtime;
-			}
-			SecondaryAttack();
-		}
-	}
-	else if ((m_bDelayedFire1 || pOwner->m_nButtons & IN_ATTACK) && m_flNextPrimaryAttack <= gpGlobals->curtime)
-	{
-		m_bDelayedFire1 = false;
-		if ((m_iClip1 <= 0 && UsesClipsForAmmo1()) || (!UsesClipsForAmmo1() && !pOwner->GetAmmoCount(m_iPrimaryAmmoType)))
-		{
-			if (!pOwner->GetAmmoCount(m_iPrimaryAmmoType))
-			{
-				DryFire();
-			}
-			else
-			{
-				StartReload();
-			}
-		}
-		// Fire underwater?
-		else if (pOwner->GetWaterLevel() == 3 && m_bFiresUnderwater == false)
-		{
-			WeaponSound(EMPTY);
-			m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
-			return;
-		}
-		else
-		{
-			// If the firing button was just pressed, reset the firing time
-			CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
-			if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK)
-			{
-				m_flNextPrimaryAttack = gpGlobals->curtime;
-			}
-			PrimaryAttack();
 		}
 	}
 
 	if (pOwner->m_nButtons & IN_RELOAD && UsesClipsForAmmo1() && !m_bInReload)
 	{
-		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		StartReload();
 	}
-	else
+	else if (!m_bInReload)
 	{
-		// no fire buttons down
 		m_bFireOnEmpty = false;
 
 		if (!HasAnyAmmo() && m_flNextPrimaryAttack < gpGlobals->curtime)
 		{
-			// weapon isn't useable, switch.
 			if (!(GetWeaponFlags() & ITEM_FLAG_NOAUTOSWITCHEMPTY) && pOwner->SwitchToNextBestWeapon(this))
 			{
 				m_flNextPrimaryAttack = gpGlobals->curtime + 0.3;
@@ -544,12 +464,10 @@ void CWeaponDoubleBarrel::ItemPostFrame(void)
 		}
 		else
 		{
-			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
 			if (m_iClip1 <= 0 && !(GetWeaponFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < gpGlobals->curtime)
 			{
 				if (StartReload())
 				{
-					// if we've successfully started to reload, we're done
 					return;
 				}
 			}
@@ -558,18 +476,14 @@ void CWeaponDoubleBarrel::ItemPostFrame(void)
 		WeaponIdle();
 		return;
 	}
-
 }
 
-
-
 //-----------------------------------------------------------------------------
-// Purpose: Constructor
+// Purpose: Constructor Initializations
 //-----------------------------------------------------------------------------
 CWeaponDoubleBarrel::CWeaponDoubleBarrel(void)
 {
 	m_bReloadsSingly = true;
-
 	m_bNeedPump = false;
 	m_bDelayedFire1 = false;
 	m_bDelayedFire2 = false;
@@ -581,22 +495,18 @@ CWeaponDoubleBarrel::CWeaponDoubleBarrel(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose: Background holster tracking adjustments
 //-----------------------------------------------------------------------------
 void CWeaponDoubleBarrel::ItemHolsterFrame(void)
 {
-	// Must be player held
 	if (GetOwner() && GetOwner()->IsPlayer() == false)
 		return;
 
-	// We can't be active
 	if (GetOwner()->GetActiveWeapon() == this)
 		return;
 
-	// If it's been longer than three seconds, reload
 	if ((gpGlobals->curtime - m_flHolsterTime) > sk_auto_reload_time.GetFloat())
 	{
-		// Reset the timer
 		m_flHolsterTime = gpGlobals->curtime;
 
 		if (GetOwner() == NULL)
@@ -605,30 +515,8 @@ void CWeaponDoubleBarrel::ItemHolsterFrame(void)
 		if (m_iClip1 == GetMaxClip1())
 			return;
 
-		// Just load the clip with no animations
 		int ammoFill = MIN((GetMaxClip1() - m_iClip1), GetOwner()->GetAmmoCount(GetPrimaryAmmoType()));
-
 		GetOwner()->RemoveAmmo(ammoFill, GetPrimaryAmmoType());
 		m_iClip1 += ammoFill;
 	}
 }
-
-//==================================================
-// Purpose: 
-//==================================================
-/*
-void CWeaponDoubleBarrel::WeaponIdle( void )
-{
-	//Only the player fires this way so we can cast
-	CBasePlayer *pPlayer = GetOwner()
-
-	if ( pPlayer == NULL )
-		return;
-
-	//If we're on a target, play the new anim
-	if ( pPlayer->IsOnTarget() )
-	{
-		SendWeaponAnim( ACT_VM_IDLE_ACTIVE );
-	}
-}
-*/

@@ -3526,6 +3526,26 @@ void C_BaseAnimating::ProcessMuzzleFlashEvent()
 		//FIXME: We should really use a named attachment for this
 		if ( m_Attachments.Count() > 0 )
 		{
+
+			//TOMBERT MUZZLE FLASH CODE
+			Vector vAttachment, vAng;
+			QAngle angles;
+			GetAttachment(1, vAttachment, angles);
+			AngleVectors(angles, &vAng);
+			vAttachment += vAng * 2;
+
+			//TOMBERT MUZZLE FLASH CODE
+			dlight_t* dl = effects->CL_AllocDlight(index);
+			dl->origin = vAttachment;
+			dl->color.r = 255;
+			dl->color.g = 150;
+			dl->color.b = 80;
+			dl->die = gpGlobals->curtime + 0.075f;
+			dl->radius = random->RandomFloat(1000.0f, 1100.0f);
+			dl->decay = 1500.0f;
+
+			//DEFAULT VALVE MUZZLE FLASH CODE
+			/*
 			Vector vAttachment;
 			QAngle dummyAngles;
 			GetAttachment( 1, vAttachment, dummyAngles );
@@ -3540,6 +3560,7 @@ void C_BaseAnimating::ProcessMuzzleFlashEvent()
 			el->color.g = 192;
 			el->color.b = 64;
 			el->color.exponent = 5;
+			*/
 		}
 	}
 }

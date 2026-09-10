@@ -16,11 +16,11 @@
 
 #include "weapon_hl2mpbasehlmpcombatweapon.h"
 
-#define	PISTOL_FASTEST_REFIRE_TIME		0.1f
+#define	PISTOL_FASTEST_REFIRE_TIME		0.2f
 #define	PISTOL_FASTEST_DRY_REFIRE_TIME	0.2f
 
-#define	PISTOL_ACCURACY_SHOT_PENALTY_TIME		0.2f	// Applied amount of time each shot adds to the time we must recover from
-#define	PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME	1.5f	// Maximum penalty to deal out
+#define	PISTOL_ACCURACY_SHOT_PENALTY_TIME		0.5f	// Applied amount of time each shot adds to the time we must recover from
+#define	PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME	3.5f	// Maximum penalty to deal out
 
 #ifdef CLIENT_DLL
 #define CWeaponPistol_Tier1 C_WeaponPistol_Tier1
@@ -187,7 +187,7 @@ void CWeaponPistol_Tier1::DryFire(void)
 //-----------------------------------------------------------------------------
 void CWeaponPistol_Tier1::PrimaryAttack(void)
 {
-	if ((gpGlobals->curtime - m_flLastAttackTime) > 0.4f)
+	if ((gpGlobals->curtime - m_flLastAttackTime) > 0.6f)
 	{
 		m_nNumShotsFired = 0;
 	}
@@ -201,14 +201,19 @@ void CWeaponPistol_Tier1::PrimaryAttack(void)
 
 	CBasePlayer* pOwner = ToBasePlayer(GetOwner());
 
-	if (pOwner)
+	if (!pOwner)
+		return;
+
+	// 2. Get the player's viewmodel
+	CBaseViewModel* pViewModel = pOwner->GetViewModel(m_nViewModelIndex);
+	if (pViewModel)
 	{
-		// Each time the player fires the pistol, reset the view punch. This prevents
-		// the aim from 'drifting off' when the player fires very quickly. This may
-		// not be the ideal way to achieve this, but it's cheap and it works, which is
-		// great for a feature we're evaluating. (sjb)
-		pOwner->ViewPunchReset();
+		// 3. Force the animation cycle back to the beginning
+		pViewModel->SetCycle(0.0f);
 	}
+
+	// 4. Now play your firing animation safely
+	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
 
 	BaseClass::PrimaryAttack();
 
@@ -230,7 +235,7 @@ void CWeaponPistol_Tier1::UpdatePenaltyTime(void)
 	if (((pOwner->m_nButtons & IN_ATTACK) == false) && (m_flSoonestPrimaryAttack < gpGlobals->curtime))
 	{
 		m_flAccuracyPenalty -= gpGlobals->frametime;
-		m_flAccuracyPenalty = clamp(m_flAccuracyPenalty, 0.0f, PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME);
+		m_flAccuracyPenalty = clamp(m_flAccuracyPenalty, 0.2f, PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME);
 	}
 }
 
@@ -279,12 +284,13 @@ void CWeaponPistol_Tier1::ItemPostFrame(void)
 	//Allow a refire as fast as the player can click
 	if (((pOwner->m_nButtons & IN_ATTACK) == false) && (m_flSoonestPrimaryAttack < gpGlobals->curtime))
 	{
-		m_flNextPrimaryAttack = gpGlobals->curtime - 0.2f;
+		m_flNextPrimaryAttack = gpGlobals->curtime - 0.15f;
 	}
 	else if ((pOwner->m_nButtons & IN_ATTACK) && (m_flNextPrimaryAttack < gpGlobals->curtime) && (m_iClip1 <= 0))
 	{
 		DryFire();
 	}
+
 }
 
 //-----------------------------------------------------------------------------
@@ -313,7 +319,7 @@ bool CWeaponPistol_Tier1::Reload(void)
 	if (fRet)
 	{
 		WeaponSound(RELOAD);
-		m_flAccuracyPenalty = 0.1f;
+		m_flAccuracyPenalty = 0.4f;
 	}
 	return fRet;
 }
@@ -330,10 +336,10 @@ void CWeaponPistol_Tier1::AddViewKick(void)
 
 	QAngle	viewPunch;
 
-	viewPunch.x = SharedRandomFloat("pistolpax", 0.35f, 0.6f);
-	viewPunch.y = SharedRandomFloat("pistolpay", -.8f, .8f);
+	viewPunch.x = SharedRandomFloat("pistolpax", 1.75f, 2.0f);
+	viewPunch.y = SharedRandomFloat("pistolpay", -2.2f, 2.2f);
 	viewPunch.z = 0.0f;
 
 	//Add it to the view punch
-	pPlayer->ViewPunch(viewPunch);
+	pPlayer->ViewPunch(QAngle(-8, random->RandomFloat(-2, 2), 0));
 }

@@ -78,6 +78,17 @@ public:
 	virtual void DeathSound(const CTakeDamageInfo& info);
 	virtual CBaseEntity* EntSelectSpawnPoint(void);
 
+	// Command intercept hook to disable jumping and use inputs
+	virtual void PlayerRunCommand(CUserCmd* ucmd, IMoveHelper* moveHelper) OVERRIDE;
+
+	// L4D2-style Downed State & Revive Integration
+	bool IsDowned(void) const { return m_bIsDowned; }
+	void DownPlayer(const CTakeDamageInfo& info);
+	void RevivePlayer(CHL2MP_Player* pReviver);
+	virtual void PlayerUse(void) OVERRIDE;
+	virtual void ItemPreFrame(void);
+	virtual void ItemPostFrame(void);
+
 	int FlashlightIsOn(void);
 	void FlashlightTurnOn(void);
 	void FlashlightTurnOff(void);
@@ -129,20 +140,27 @@ public:
 	void State_Enter_OBSERVER_MODE();
 	void State_PreThink_OBSERVER_MODE();
 
-
 	virtual bool StartObserverMode(int mode);
 	virtual void StopObserverMode(void);
 
+	Vector m_vecTotalBulletForce;
 
-	Vector m_vecTotalBulletForce;	//Accumulator for bullet force in a single frame
-
-	// Tracks our ragdoll entity.
-	CNetworkHandle(CBaseEntity, m_hRagdoll);	// networked entity handle 
+	CNetworkHandle(CBaseEntity, m_hRagdoll);
 
 	virtual bool	CanHearAndReadChatFrom(CBasePlayer* pPlayer);
 
 	bool IsThreatAimingTowardMe(CBaseEntity* threat, float cosTolerance = 0.8f) const;
 	bool IsThreatFiringAtMe(CBaseEntity* threat) const;
+
+	// Networked variables for Downed State, Revive, and Bleedout
+	CNetworkVar(bool, m_bIsDowned);
+	CNetworkVar(float, m_flReviveProgress);
+	CNetworkVar(float, m_flBleedoutTimer);
+	CNetworkHandle(CHL2MP_Player, m_hRevivingTeammate);
+
+	// Downed counter to handle bleedout timers on consecutive downs
+	int m_iDownedCount;
+
 private:
 
 	CNetworkQAngle(m_angEyeAngles);
@@ -163,7 +181,6 @@ private:
 
 	bool ShouldRunRateLimitedCommand(const CCommand& args);
 
-	// This lets us rate limit the commands the players can execute so they don't overflow things like reliable buffers.
 	CUtlDict<float, int>	m_RateLimitLastCommandTimes;
 
 	bool m_bEnterObserver;

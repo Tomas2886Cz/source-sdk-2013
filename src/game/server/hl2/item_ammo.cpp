@@ -36,7 +36,7 @@ int ITEM_GiveAmmo( CBasePlayer *pPlayer, float flCount, const char *pszAmmoName,
 }
 
 // ========================================================================
-//	>> Medkit
+//	>> TOMBERT Medkit
 // ========================================================================
 class CItem_Medkit : public CItem
 {
@@ -70,6 +70,123 @@ public:
 #endif
 };
 LINK_ENTITY_TO_CLASS(item_ammo_medkit, CItem_Medkit);
+
+// ========================================================================
+//	>> TOMBERT SCRAP WEAPON
+// ========================================================================
+class CItem_ScrapWeapon : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_ScrapWeapon, CItem);
+
+	void Spawn(void)
+	{
+		Precache();
+		SetModel("models/items/scrap_weapon.mdl");
+		BaseClass::Spawn();
+	}
+	void Precache(void)
+	{
+		PrecacheModel("models/items/scrap_weapon.mdl");
+	}
+	bool MyTouch(CBasePlayer* pPlayer)
+	{
+		if (ITEM_GiveAmmo(pPlayer, RandomInt(25, 75), "Scrap_Weapon"))
+		{
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
+			{
+				UTIL_Remove(this);
+			}
+
+			return true;
+		}
+		return false;
+	}
+
+//#if defined( HL2MP )
+//	virtual const char* GetWeaponClassForAmmo() const { return "weapon_pistol"; }
+//#endif
+
+};
+LINK_ENTITY_TO_CLASS(item_scrap_weapon, CItem_ScrapWeapon);
+
+// ========================================================================
+//	>> TOMBERT SCRAP MEDICAL
+// ========================================================================
+class CItem_ScrapMedical : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_ScrapMedical, CItem);
+
+	void Spawn(void)
+	{
+		Precache();
+		SetModel("models/items/scrap_medical.mdl");
+		BaseClass::Spawn();
+	}
+	void Precache(void)
+	{
+		PrecacheModel("models/items/scrap_medical.mdl");
+	}
+	bool MyTouch(CBasePlayer* pPlayer)
+	{
+		if (ITEM_GiveAmmo(pPlayer, RandomInt(25, 75), "Scrap_Medical"))
+		{
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
+			{
+				UTIL_Remove(this);
+			}
+
+			return true;
+		}
+		return false;
+	}
+
+	#if defined( HL2MP )
+		virtual const char* GetWeaponClassForAmmo() const { return "weapon_blueprint_medkit"; }
+	#endif
+
+};
+LINK_ENTITY_TO_CLASS(item_scrap_medical, CItem_ScrapMedical);
+
+// ========================================================================
+//	>> TOMBERT SCRAP UTILITY
+// ========================================================================
+class CItem_ScrapUtility : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_ScrapUtility, CItem);
+
+	void Spawn(void)
+	{
+		Precache();
+		SetModel("models/items/scrap_utility.mdl");
+		BaseClass::Spawn();
+	}
+	void Precache(void)
+	{
+		PrecacheModel("models/items/scrap_utility.mdl");
+	}
+	bool MyTouch(CBasePlayer* pPlayer)
+	{
+		if (ITEM_GiveAmmo(pPlayer, RandomInt(25, 75), "Scrap_Utility"))
+		{
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
+			{
+				UTIL_Remove(this);
+			}
+
+			return true;
+		}
+		return false;
+	}
+
+	#if defined( HL2MP )
+		virtual const char* GetWeaponClassForAmmo() const { return "weapon_blueprint_flareround"; }
+	#endif
+
+};
+LINK_ENTITY_TO_CLASS(item_scrap_utility, CItem_ScrapUtility);
 
 // ========================================================================
 //	>> BoxSRounds
@@ -432,12 +549,12 @@ public:
 	void Spawn( void )
 	{ 
 		Precache( );
-		SetModel( "models/items/flare.mdl");
+		SetModel( "models/props_junk/flare.mdl");
 		BaseClass::Spawn( );
 	}
 	void Precache( void )
 	{
-		PrecacheModel ("models/items/flare.mdl");
+		PrecacheModel ("models/props_junk/flare.mdl");
 	}
 	bool MyTouch( CBasePlayer *pPlayer )
 	{

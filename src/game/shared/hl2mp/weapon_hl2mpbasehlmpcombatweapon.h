@@ -48,6 +48,15 @@ public:
 	static const	WeaponProficiencyInfo_t *GetDefaultProficiencyValues();
 
 	virtual void	ItemHolsterFrame( void );
+	
+	//DROPPABLE
+	virtual void Spawn(void);
+	virtual bool CanBeDropped(void) const { return true; }
+	virtual void Drop(const Vector& vecVelocity);
+	virtual void Touch(CBaseEntity* pOther);
+	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+	virtual int ObjectCaps(void) { return BaseClass::ObjectCaps() | FCAP_IMPULSE_USE; }
+
 
 protected:
 

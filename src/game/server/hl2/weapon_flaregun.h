@@ -100,6 +100,12 @@ public:
 	void Precache( void );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
+
+	DECLARE_DATADESC();
+
+	CFlaregun();
+
+	void ItemUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value); // Add this line
 };
 
 #endif // WEAPON_FLAREGUN_H

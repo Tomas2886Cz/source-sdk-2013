@@ -82,6 +82,47 @@ void CBaseHL2MPCombatWeapon::ItemHolsterFrame( void )
 	}
 }
 
+//DROPPING
+void CBaseHL2MPCombatWeapon::Drop(const Vector& vecVelocity)
+{
+	if (!CanBeDropped())
+		return;
+
+	// Drop ammo along with it or handle dropping through base class
+	BaseClass::Drop(vecVelocity);
+}
+void CBaseHL2MPCombatWeapon::Touch(CBaseEntity* pOther)
+{
+	// Disable automatic touch-pickup completely by leaving this empty or calling BaseClass only for non-players
+	// Do NOT call CBaseCombatWeapon::Touch( pOther ) here for players!
+
+	// Optional: Allow environmental items or physics props to interact normally if needed, but ignore players.
+	if (pOther->IsPlayer())
+		return;
+
+	BaseClass::Touch(pOther);
+}
+
+void CBaseHL2MPCombatWeapon::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+#ifndef CLIENT_DLL
+	CBasePlayer* pPlayer = ToBasePlayer(pActivator);
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->IsAlive())
+	{
+		pPlayer->Weapon_Equip(this);
+		EmitSound("Default.Pickup");
+
+		SetTouch(NULL);
+		SetUse(NULL);
+		UTIL_Remove(this);
+	}
+#endif
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Drops the weapon into a lowered pose
 // Output : Returns true on success, false on failure.
@@ -109,6 +150,19 @@ bool CBaseHL2MPCombatWeapon::Ready( void )
 	m_bLowered = false;	
 	m_flRaiseTime = gpGlobals->curtime + 0.5f;
 	return true;
+}
+
+//DROPPING
+void CBaseHL2MPCombatWeapon::Spawn(void)
+{
+	CBaseCombatWeapon::Spawn();
+
+#ifndef CLIENT_DLL
+	// Enable USE inputs so players can pick it up by pressing +use
+	SetSolid(SOLID_BBOX);
+	SetModel(STRING(GetModelName()));
+	SetUse(&CBaseHL2MPCombatWeapon::Use);
+#endif
 }
 
 //-----------------------------------------------------------------------------

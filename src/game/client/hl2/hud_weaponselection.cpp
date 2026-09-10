@@ -301,7 +301,8 @@ void CHudWeaponSelection::ActivateFastswitchWeaponDisplay( C_BaseCombatWeapon *p
 	// find out where our selected weapon is in the full list
 	int cWeapons = 0;
 	int iLastSelectedWeaponBox = -1;
-	for ( int i = 0; i < MAX_WEAPON_SLOTS; i++ )
+	//for (int i = 0; i < MAX_WEAPON_SLOTS; i++)
+	for ( int i = 0; i < 9; i++ )
 	{
 		for (int slotpos = 0; slotpos < MAX_WEAPON_POSITIONS; slotpos++)
 		{
@@ -671,7 +672,8 @@ void CHudWeaponSelection::Paint()
 
 			// draw the bucket set
 			// iterate over all the weapon slots
-			for ( int i = 0; i < MAX_WEAPON_SLOTS; i++ )
+			//for (int i = 0; i < MAX_WEAPON_SLOTS; i++)
+			for ( int i = 0; i < 9; i++ )
 			{
 				if ( i == iActiveSlot )
 				{

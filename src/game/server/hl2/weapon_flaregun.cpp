@@ -86,6 +86,7 @@ IMPLEMENT_SERVERCLASS_ST( CFlare, DT_Flare )
 	SendPropInt( SENDINFO( m_bLight ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_bSmoke ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_bPropFlare ), 1, SPROP_UNSIGNED ),
+
 END_SEND_TABLE()
 
 CFlare *CFlare::activeFlares = NULL;
@@ -111,6 +112,8 @@ CBaseEntity *CreateFlare( Vector vOrigin, QAngle Angles, CBaseEntity *pOwner, fl
 
 	return pFlare;
 }
+
+
 
 void KillFlare( CBaseEntity *pOwnerEntity, CBaseEntity *pEntity, float flKillTime )
 {
@@ -685,6 +688,16 @@ void CFlaregun::Precache( void )
 	PrecacheScriptSound( "Weapon_FlareGun.Burn" );
 
 	UTIL_PrecacheOther( "env_flare" );
+
+
+
+
+}
+
+CFlaregun::CFlaregun()
+{
+	// Assign the use callback function correctly using SetUse
+	SetUse(&CFlaregun::ItemUse);
 }
 
 //-----------------------------------------------------------------------------
@@ -724,6 +737,20 @@ void CFlaregun::PrimaryAttack( void )
 	WeaponSound( SINGLE );
 }
 
+void CFlaregun::ItemUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	CBasePlayer* pPlayer = ToBasePlayer(pActivator);
+	if (pPlayer && pPlayer->IsAlive())
+	{
+		// Give the weapon directly to the player inventory
+		if (pPlayer->GiveNamedItem(GetClassname()))
+		{
+			// Remove the world entity since it's now in inventory
+			UTIL_Remove(this);
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -761,3 +788,6 @@ void CFlaregun::SecondaryAttack( void )
 	WeaponSound(SINGLE);
 }
 
+BEGIN_DATADESC(CFlaregun)
+DEFINE_USEFUNC(ItemUse),
+END_DATADESC()

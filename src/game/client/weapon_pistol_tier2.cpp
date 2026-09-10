@@ -65,7 +65,7 @@ public:
 			1.0f);
 
 		// We lerp from very accurate to inaccurate over time
-		VectorLerp(VECTOR_CONE_2DEGREES, VECTOR_CONE_8DEGREES, ramp, cone);
+		VectorLerp(VECTOR_CONE_6DEGREES, VECTOR_CONE_15DEGREES, ramp, cone);
 
 		return cone;
 	}
@@ -154,7 +154,7 @@ CWeaponPistol_Tier2::CWeaponPistol_Tier2(void)
 	m_flAccuracyPenalty = 0.0f;
 
 	m_fMinRange1 = 24;
-	m_fMaxRange1 = 1500;
+	m_fMaxRange1 = 900;
 	m_fMinRange2 = 24;
 	m_fMaxRange2 = 200;
 
@@ -201,14 +201,19 @@ void CWeaponPistol_Tier2::PrimaryAttack(void)
 
 	CBasePlayer* pOwner = ToBasePlayer(GetOwner());
 
-	if (pOwner)
+	if (!pOwner)
+		return;
+
+	// Check ViewModel
+	CBaseViewModel* pViewModel = pOwner->GetViewModel(m_nViewModelIndex);
+	if (pViewModel)
 	{
-		// Each time the player fires the pistol, reset the view punch. This prevents
-		// the aim from 'drifting off' when the player fires very quickly. This may
-		// not be the ideal way to achieve this, but it's cheap and it works, which is
-		// great for a feature we're evaluating. (sjb)
-		pOwner->ViewPunchReset();
+		// 3. Force the animation cycle back to the beginning
+		pViewModel->SetCycle(0.0f);
 	}
+
+	// Play Firing Anim
+	SendWeaponAnim(ACT_VM_PRIMARYATTACK);
 
 	BaseClass::PrimaryAttack();
 
@@ -330,8 +335,8 @@ void CWeaponPistol_Tier2::AddViewKick(void)
 
 	QAngle	viewPunch;
 
-	viewPunch.x = SharedRandomFloat("pistolpax", 0.15f, 0.3f);
-	viewPunch.y = SharedRandomFloat("pistolpay", -.7f, .7f);
+	viewPunch.x = SharedRandomFloat("pistolpax", 0.5f, 0.8f);
+	viewPunch.y = SharedRandomFloat("pistolpay", -1.1f, 1.0f);
 	viewPunch.z = 0.0f;
 
 	//Add it to the view punch
