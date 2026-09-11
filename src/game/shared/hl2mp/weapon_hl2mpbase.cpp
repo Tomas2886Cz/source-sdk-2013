@@ -96,84 +96,9 @@ CWeaponHL2MPBase::CWeaponHL2MPBase()
 // -----------------------------------------------------------------------------
 void CWeaponHL2MPBase::ItemPostFrame(void)
 {
-	CHL2MP_Player* pOwner = ToHL2MPPlayer(GetOwner());
-	if (!pOwner)
-		return;
-
-	bool bHasLowerAnim = false;
-	CBaseViewModel* pVM = pOwner->GetViewModel();
-
-	if (pVM)
-	{
-		bHasLowerAnim = (pVM->SelectWeightedSequence(ACT_VM_IDLE_TO_LOWERED) != -1);
-	}
-
-	bool bShouldLower = pOwner->IsSprinting() && sprint_lowers_weapon.GetBool();
-
-	// -----------------------------------------------------------------------------
-	// Sprinting Logic
-	// -----------------------------------------------------------------------------
-	if (bShouldLower && bHasLowerAnim)
-	{
-		// Cancel a reload if the player suddenly sprints
-		if (m_bInReload)
-		{
-			m_bInReload = false;
-		}
-
-		int iActivity = GetActivity();
-
-		// 1. If the weapon is currently up, start pulling it down
-		if (iActivity != ACT_VM_IDLE_LOWERED && iActivity != ACT_VM_IDLE_TO_LOWERED)
-		{
-			SendWeaponAnim(ACT_VM_IDLE_TO_LOWERED);
-			m_flTimeWeaponIdle = gpGlobals->curtime + SequenceDuration();
-		}
-		// 2. If the pull-down animation just finished
-		else if (iActivity == ACT_VM_IDLE_TO_LOWERED && m_flTimeWeaponIdle <= gpGlobals->curtime)
-		{
-			// ONLY attempt to play the lowered idle animation if the weapon actually possesses it.
-			// If it doesn't, it will simply hold the last frame of the pull-down animation.
-			if (pVM->SelectWeightedSequence(ACT_VM_IDLE_LOWERED) != -1)
-			{
-				SendWeaponAnim(ACT_VM_IDLE_LOWERED);
-			}
-
-			// Push idle timer far forward so the base class doesn't auto-raise the gun
-			m_flTimeWeaponIdle = gpGlobals->curtime + 9999.0f;
-		}
-		// 3. Keep the idle timer pushed forward while actively lowered
-		else if (iActivity == ACT_VM_IDLE_LOWERED)
-		{
-			m_flTimeWeaponIdle = gpGlobals->curtime + 9999.0f;
-		}
-
-		// Constantly block firing while sprinting using absolute block time logic
-		float flShootDelay = sprint_shoot_delay.GetFloat();
-		float flBlockTime = MAX(gpGlobals->interval_per_tick, flShootDelay);
-
-		m_flNextPrimaryAttack = gpGlobals->curtime + flBlockTime;
-		m_flNextSecondaryAttack = gpGlobals->curtime + flBlockTime;
-	}
-	else if (bHasLowerAnim)
-	{
-		int iActivity = GetActivity();
-
-		// If the player stops sprinting, bring the weapon back up
-		if (iActivity == ACT_VM_IDLE_LOWERED || iActivity == ACT_VM_IDLE_TO_LOWERED)
-		{
-			SendWeaponAnim(ACT_VM_LOWERED_TO_IDLE);
-
-			float flShootDelay = sprint_shoot_delay.GetFloat();
-
-			m_flNextPrimaryAttack = gpGlobals->curtime + flShootDelay;
-			m_flNextSecondaryAttack = gpGlobals->curtime + flShootDelay;
-			m_flTimeWeaponIdle = gpGlobals->curtime + SequenceDuration();
-		}
-	}
-
-	// Call the base class to handle normal weapon inputs (firing, reloading)
 	BaseClass::ItemPostFrame();
+
+	// Vanilla HL2MP post frame handling (reload checks, etc.)
 }
 
 

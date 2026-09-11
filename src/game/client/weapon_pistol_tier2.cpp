@@ -20,7 +20,7 @@
 #define	PISTOL_FASTEST_DRY_REFIRE_TIME	0.25f
 
 #define	PISTOL_ACCURACY_SHOT_PENALTY_TIME		0.4f	// Applied amount of time each shot adds to the time we must recover from
-#define	PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME	1.7f	// Maximum penalty to deal out
+#define	PISTOL_ACCURACY_MAXIMUM_PENALTY_TIME	1.2f	// Maximum penalty to deal out
 
 #ifdef CLIENT_DLL
 #define CWeaponPistol_Tier2 C_WeaponPistol_Tier2
@@ -335,8 +335,8 @@ void CWeaponPistol_Tier2::AddViewKick(void)
 
 	QAngle	viewPunch;
 
-	viewPunch.x = SharedRandomFloat("pistolpax", 0.5f, 0.8f);
-	viewPunch.y = SharedRandomFloat("pistolpay", -1.1f, 1.0f);
+	viewPunch.x = SharedRandomFloat("pistolpax", -1.0f, 1.5f);
+	viewPunch.y = SharedRandomFloat("pistolpay", -0.6f, 3f);
 	viewPunch.z = 0.0f;
 
 	//Add it to the view punch

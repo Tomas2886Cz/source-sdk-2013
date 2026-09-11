@@ -324,7 +324,7 @@ void CWeaponShotgun_Tier1::PrimaryAttack(void)
 	pPlayer->FireBullets(info);
 
 	QAngle punch;
-	punch.Init(SharedRandomFloat("shotgunpax", -4, -2), SharedRandomFloat("shotgunpay", -4, 4), 0);
+	punch.Init(SharedRandomFloat("shotgunpax", -14, -12), SharedRandomFloat("shotgunpay", -12, 12), 0);
 	pPlayer->ViewPunch(punch);
 
 	if (!m_iClip1 && pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)

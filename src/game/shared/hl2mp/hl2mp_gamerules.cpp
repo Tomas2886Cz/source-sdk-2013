@@ -980,11 +980,12 @@ CAmmoDef *GetAmmoDef()
 		def.AddAmmoType("Grenade",			DMG_BURN,					TRACER_NONE,			0,			0,			5,			0,							0 );
 		def.AddAmmoType("slam",				DMG_BURN,					TRACER_NONE,			0,			0,			5,			0,							0 );
 		//TOMBERT MOD AMMO
-		def.AddAmmoType("Medkit",			DMG_GENERIC,				TRACER_NONE,			0,			0,			3,		BULLET_IMPULSE(10, 10), 0);
-		def.AddAmmoType("FlareRound",		DMG_BURN,					TRACER_NONE,			15,			15,			5,						BULLET_IMPULSE(1500, 600), 0);
+		def.AddAmmoType("Medkit",			DMG_GENERIC,				TRACER_NONE,			0,			0,			3,			BULLET_IMPULSE(10, 10),		0);
+		def.AddAmmoType("FlareRound",		DMG_BURN,					TRACER_NONE,			15,			15,			5,			BULLET_IMPULSE(1500, 600),	0);
 		def.AddAmmoType("Scrap_Weapon",		DMG_GENERIC,				TRACER_NONE,			0,			0,			1000,		0,							0);
 		def.AddAmmoType("Scrap_Medical",	DMG_GENERIC,				TRACER_NONE,			0,			0,			1000,		0,							0);
 		def.AddAmmoType("Scrap_Utility",	DMG_GENERIC,				TRACER_NONE,			0,			0,			1000,		0,							0);
+		def.AddAmmoType("GLGrenade",		DMG_BLAST,					TRACER_NONE,			0,			0,			12,			12,							0);
 	}
 
 	return &def;

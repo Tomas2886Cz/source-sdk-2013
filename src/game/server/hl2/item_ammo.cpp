@@ -189,6 +189,43 @@ public:
 LINK_ENTITY_TO_CLASS(item_scrap_utility, CItem_ScrapUtility);
 
 // ========================================================================
+//	>> TOMBERT GRENADE LAUNCHER MUNICE GLGRENADE AMMO
+// ========================================================================
+class CItem_GLGrenade : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_GLGrenade, CItem);
+
+	void Spawn(void)
+	{
+		Precache();
+		SetModel("models/w_models/weapons/w_he_grenade.mdl");
+		BaseClass::Spawn();
+	}
+
+	void Precache(void)
+	{
+		PrecacheModel("models/w_models/weapons/w_he_grenade.mdl");
+	}
+
+	bool MyTouch(CBasePlayer* pPlayer)
+	{
+		// The '3' is the amount of ammo given per pickup. Adjust as needed.
+		if (ITEM_GiveAmmo(pPlayer, 1, "GLGrenade"))
+		{
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
+			{
+				UTIL_Remove(this);
+			}
+			return true;
+		}
+		return false;
+	}
+};
+LINK_ENTITY_TO_CLASS(item_ammo_glgrenade, CItem_GLGrenade);
+
+
+// ========================================================================
 //	>> BoxSRounds
 // ========================================================================
 class CItem_BoxSRounds : public CItem

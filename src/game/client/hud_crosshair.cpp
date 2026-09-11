@@ -336,9 +336,9 @@ void CHudCrosshair::Paint(void)
 		flTargetAlpha = 0.0f;
 		flCurrentFadeRate = cl_crosshair_fade_out_speed.GetFloat();
 	}
-	else if (gpGlobals->curtime < s_flStopSprintTime + cl_crosshair_fade_in_delay.GetFloat())
+	else if (s_flCrosshairAlpha <= 0.01f && gpGlobals->curtime < s_flStopSprintTime + cl_crosshair_fade_in_delay.GetFloat())
 	{
-		// Hold alpha at 0 during the configured fade-in delay period
+		// Hold alpha at 0 during the configured delay period ONLY if it fully faded out
 		flTargetAlpha = 0.0f;
 	}
 
