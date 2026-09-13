@@ -3,12 +3,12 @@
 WeaponData
 {
 	// Weapon data is loaded by both the Game and Client DLLs.
-	"printname"	"#HL2_Crowbar"
-	"viewmodel"				"models/weapons/v_crowbar.mdl"
-	"playermodel"			"models/weapons/w_crowbar.mdl"
+	"printname"				"#HL2_Crowbar"
+	"viewmodel"				"models/weapons/v_fists.mdl"
+	"playermodel"			"models/weapons/w_fists.mdl"
 	"anim_prefix"			"crowbar"
 	"bucket"				"0"
-	"bucket_position"		"0"
+	"bucket_position"		"50"
 
 	"clip_size"				"-1"
 	"primary_ammo"			"None"
@@ -45,19 +45,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"0"
-				"y"			"48"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"48"
-				"y"			"72"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
 		}
 	}
 }

@@ -1,0 +1,84 @@
+// Missile Launcher
+
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"				"#MODHL2MP_GrenadeLauncher_Pump"
+	"viewmodel"				"models/my_black_ops_weapons/chinalake/v_aron_chinalake.mdl"
+	"playermodel"			"models/my_black_ops_weapons/chinalake/w_aron_chinalake.mdl.mdl"
+	"anim_prefix"			"missile launcher"
+	"bucket"				"5"
+	"bucket_position"		"0"
+	"autoswitchfrom"		"1"
+
+	"clip_size"				"4"
+	"clip2_size"			"-1"
+	"default_clip"			"4"
+	"default_clip2"			"-1"
+
+	"primary_ammo"			"GLGrenade"
+	"secondary_ammo"		"None"
+
+	"weight"				"0"
+	"item_flags"			"0"
+	"damage"				"150"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+		"single_shot"		"Weapon_GrenadeLauncher_Pump.Fire"
+		"reload"			"Weapon_GrenadeLauncher_Pump.Reload"
+		"empty"				"Weapon_Shotgun.Empty"		
+		"special1"			"Weapon_Shotgun.Special1"
+		"single_shot"		"Weapon_Shotgun.Single"
+		"double_shot"		"Weapon_Shotgun.Double"
+		// NPC WEAPON SOUNDS
+		"reload_npc"		"Weapon_Shotgun.NPC_Reload"
+		"single_shot_npc"	"Weapon_Shotgun.NPC_Single"		
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		"weapon"
+		{
+				"font"		"TF2CharacterIcons"
+				"character"	"d"
+		}
+		"weapon_s"
+		{	
+				"font"		"TF2CharacterIcons"
+				"character"	"d"
+		}
+		"weapon_small"
+		{
+				"font"		"TF2CharacterIcons"
+				"character"	"d"
+		}
+		"ammo"
+		{
+				"font"		"WeaponIconsSmallSecondary"
+				"character"	"x"
+		}
+		"crosshair"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"a"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"a"
+		}
+		"autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"a"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"a"
+		}
+	}
+}

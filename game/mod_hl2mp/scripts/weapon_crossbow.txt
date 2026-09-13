@@ -7,18 +7,18 @@ WeaponData
 	"viewmodel"		"models/weapons/v_crossbow.mdl"
 	"playermodel"	"models/weapons/w_crossbow.mdl"
 	"anim_prefix"	"bow"
-	"bucket"			"3"
-	"bucket_position"	"1"
+	"bucket"			"4"
+	"bucket_position"	"0"
 
-	"clip_size"		"1"
+	"clip_size"			"1"
 	"default_clip"		"5"
 	"primary_ammo"		"XBowBolt"
 	"secondary_ammo"	"None"
 
-	"weight"		"6"
+	"weight"			"6"
 	"item_flags"		"0"
 
-	"damage"		"100"
+	"damage"			"100"
 
 	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
 	SoundData
@@ -54,29 +54,26 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
-		}		
-		"autoaim"
-		{
-			"file"		"sprites/crosshairs"
-			"x"		"0"
-			"y"		"96"
-			"width"		"24"
-			"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"4"
 		}
 		"zoom"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
-		}		
+			"file"		"sprites/scope"
+			"x"		"0"
+			"y"		"0"
+			"width"		"2048"
+			"height"	"2048"
+		}
+		"autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"4"
+		}
 		"zoom_autoaim"
 		{
-			"file"		"sprites/crosshairs"
-			"x"		"24"
-			"y"		"112"
-			"width"		"104"
-			"height"	"16"
+				"font"		"HL2MModCrosshairs"
+				"character"	"5"
 		}
 	}
 }

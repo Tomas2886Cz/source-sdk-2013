@@ -24,6 +24,8 @@
 #include "ammodef.h"
 #include "NextBot.h"
 #include "gashunt_manager.h"
+#include "items.h"
+#include "mp_shareddefs.h"
 
 #include "engine/IEngineSound.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
@@ -38,6 +40,9 @@ CBaseEntity* g_pLastRebelSpawn = NULL;
 extern CBaseEntity* g_pLastSpawn;
 
 ConVar hl2mp_spawn_frag_fallback_radius("hl2mp_spawn_frag_fallback_radius", "48", FCVAR_NONE, "If no spawns are available, kill players with this radius to allow new players to spawn.");
+
+// Backpack ConVars
+ConVar sv_backpack_lock_movement("sv_backpack_lock_movement", "1", FCVAR_REPLICATED, "Force player crouched and immobile when backpack is open.");
 
 // Customizable Downed ConVars
 ConVar sv_downed_enable("sv_downed_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Enable or disable the downed state feature (1 = Enabled, 0 = Disabled).");
@@ -114,6 +119,10 @@ SendPropEHandle(SENDINFO(m_hRagdoll)),
 SendPropInt(SENDINFO(m_iSpawnInterpCounter)),
 SendPropInt(SENDINFO(m_iPlayerSoundType)),
 
+// Backpack state datatable network properties
+SendPropBool(SENDINFO(m_bBackpackOpen)),
+SendPropEHandle(SENDINFO(m_hBackpackModel)),
+
 // Downed state datatable network properties
 SendPropBool(SENDINFO(m_bIsDowned)),
 SendPropFloat(SENDINFO(m_flReviveProgress)),
@@ -179,6 +188,9 @@ CHL2MP_Player::CHL2MP_Player() : m_PlayerAnimState(this)
 	m_bEnterObserver = false;
 	m_bReady = false;
 
+	m_bBackpackOpen = false;
+	m_hBackpackModel = NULL;
+
 	m_bIsDowned = false;
 	m_flReviveProgress = 0.0f;
 	m_flBleedoutTimer = 0.0f;
@@ -201,6 +213,12 @@ void CHL2MP_Player::UpdateOnRemove(void)
 		m_hRagdoll = NULL;
 	}
 
+	if (m_hBackpackModel)
+	{
+		UTIL_RemoveImmediate(m_hBackpackModel);
+		m_hBackpackModel = NULL;
+	}
+
 	BaseClass::UpdateOnRemove();
 }
 
@@ -209,6 +227,8 @@ void CHL2MP_Player::Precache(void)
 	BaseClass::Precache();
 
 	PrecacheModel("sprites/glow01.vmt");
+	PrecacheModel("models/props_collectables/backpack.mdl");
+	PrecacheScriptSound("Player.BackpackOpen");
 
 	int nHeads = ARRAYSIZE(g_ppszRandomCitizenModels);
 	int i;
@@ -361,6 +381,8 @@ void CHL2MP_Player::Spawn(void)
 	m_flNextModelChangeTime = 0.0f;
 	m_flNextTeamChangeTime = 0.0f;
 
+	SetBackpackOpen(false);
+
 	m_bIsDowned = false;
 	m_flReviveProgress = 0.0f;
 	m_flBleedoutTimer = 0.0f;
@@ -450,8 +472,73 @@ void CHL2MP_Player::PickupObject(CBaseEntity* pObject, bool bLimitMassAndSize)
 	return BaseClass::PickupObject(pObject, bLimitMassAndSize);
 }
 
+void CHL2MP_Player::SetBackpackOpen(bool bOpen)
+{
+	if (m_bBackpackOpen == bOpen)
+		return;
+
+	m_bBackpackOpen = bOpen;
+
+	if (m_bBackpackOpen)
+	{
+		EmitSound("Player.BackpackOpen");
+
+		Vector vOrigin = GetAbsOrigin();
+		QAngle qAngles = GetAbsAngles();
+		qAngles[PITCH] = 0.0f;
+		qAngles[ROLL] = 0.0f;
+
+		CBaseAnimating* pBackpack = (CBaseAnimating*)CBaseEntity::Create("prop_dynamic", vOrigin, qAngles, this);
+		if (pBackpack)
+		{
+			pBackpack->SetModel("models/props_collectables/backpack.mdl");
+			pBackpack->Spawn();
+			pBackpack->SetSolid(SOLID_NONE);
+			m_hBackpackModel = pBackpack;
+		}
+	}
+	else
+	{
+		if (m_hBackpackModel.Get())
+		{
+			UTIL_Remove(m_hBackpackModel);
+			m_hBackpackModel = NULL;
+		}
+	}
+}
+
+void CHL2MP_Player::DropSelectedInventoryItem()
+{
+	CBaseCombatWeapon* pWeapon = GetActiveWeapon();
+	if (pWeapon)
+	{
+		Weapon_Drop(pWeapon);
+	}
+}
+
+void CHL2MP_Player::SwitchToBlueprintWeapon(const char* szClassname)
+{
+	if (!Weapon_OwnsThisType(szClassname))
+		return;
+
+	CBaseCombatWeapon* pWeapon = Weapon_OwnsThisType(szClassname);
+	if (pWeapon)
+	{
+		Weapon_Switch(pWeapon);
+		SetBackpackOpen(false);
+	}
+}
+
 void CHL2MP_Player::PlayerRunCommand(CUserCmd* ucmd, IMoveHelper* moveHelper)
 {
+	if (m_bBackpackOpen && sv_backpack_lock_movement.GetBool() && ucmd)
+	{
+		ucmd->forwardmove = 0.0f;
+		ucmd->sidemove = 0.0f;
+		ucmd->upmove = 0.0f;
+		ucmd->buttons |= IN_DUCK;
+	}
+
 	// Intercept user commands directly before movement processing
 	if (sv_downed_enable.GetBool() && m_bIsDowned && ucmd)
 	{
@@ -1472,6 +1559,8 @@ void CHL2MP_Player::DetonateTripmines(void)
 
 void CHL2MP_Player::Event_Killed(const CTakeDamageInfo& info)
 {
+	SetBackpackOpen(false);
+
 	m_bIsDowned = false;
 	m_flBleedoutTimer = 0.0f;
 	m_flReviveProgress = 0.0f;
@@ -1912,7 +2001,38 @@ bool CHL2MP_Player::IsThreatFiringAtMe(CBaseEntity* threat) const
 	return false;
 }
 
-//DROPPING
+CON_COMMAND(server_toggle_backpack, "Toggles the player backpack state on the server.")
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer)
+		return;
+
+	pPlayer->SetBackpackOpen(!pPlayer->IsBackpackOpen());
+}
+
+CON_COMMAND(backpack_drop_selected, "Drops the currently selected item from the backpack menu.")
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer || !pPlayer->IsBackpackOpen())
+		return;
+
+	pPlayer->DropSelectedInventoryItem();
+}
+
+static void bp_switch_weapon_f(const CCommand& args)
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer || !pPlayer->IsBackpackOpen())
+		return;
+
+	if (args.ArgC() < 2)
+		return;
+
+	const char* szBlueprintWeapon = args[1];
+	pPlayer->SwitchToBlueprintWeapon(szBlueprintWeapon);
+}
+static ConCommand bp_switch_weapon("bp_switch_weapon", bp_switch_weapon_f, "Switches current weapon to specified blueprint.", FCVAR_CLIENTCMD_CAN_EXECUTE);
+
 CON_COMMAND(drop, "Drops the currently held weapon.")
 {
 	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
@@ -1938,6 +2058,7 @@ CON_COMMAND(drop, "Drops the currently held weapon.")
 
 	pPlayer->Weapon_Drop(pWeapon, &vecVelocity);
 }
+
 CON_COMMAND(dropammo, "Drops a clip of ammo for the currently held weapon.")
 {
 	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
@@ -1978,8 +2099,7 @@ CON_COMMAND(dropammo, "Drops a clip of ammo for the currently held weapon.")
 	Vector vecSrc = pPlayer->Weapon_ShootPosition() + vecForward * 32.0f;
 	Vector vecVelocity = vecForward * 100.0f + Vector(0, 0, 50.0f);
 
-	// You can spawn a generic item or map it to your mod's ammo entity classnames
-	CBaseEntity* pAmmoDrop = CreateEntityByName("item_ammo_crate"); // Or a custom ammo drop entity
+	CBaseEntity* pAmmoDrop = CreateEntityByName("item_ammo_crate");
 	if (pAmmoDrop)
 	{
 		pAmmoDrop->SetAbsOrigin(vecSrc);
@@ -1989,3 +2109,103 @@ CON_COMMAND(dropammo, "Drops a clip of ammo for the currently held weapon.")
 
 	ClientPrint(pPlayer, HUD_PRINTCONSOLE, "Dropped ammo.\n");
 }
+
+CON_COMMAND(backpack_drop_index, "Drops a specific weapon by entity index from the backpack.")
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer || !pPlayer->IsBackpackOpen())
+		return;
+
+	if (args.ArgC() < 2)
+		return;
+
+	int iEntIndex = atoi(args[1]);
+	CBaseEntity* pEntity = CBaseEntity::Instance(iEntIndex);
+	CBaseCombatWeapon* pWeapon = dynamic_cast<CBaseCombatWeapon*>(pEntity);
+
+	if (pWeapon && pWeapon->GetOwner() == pPlayer)
+	{
+		pPlayer->Weapon_Drop(pWeapon);
+	}
+}
+
+static void backpack_drop_ammo_f(const CCommand& args)
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(UTIL_GetCommandClient());
+	if (!pPlayer || args.ArgC() < 2)
+		return;
+
+	int iEntIndex = Q_atoi(args[1]);
+	CBaseEntity* pEntity = CBaseEntity::Instance(iEntIndex);
+	CBaseCombatWeapon* pWeapon = dynamic_cast<CBaseCombatWeapon*>(pEntity);
+
+	if (!pWeapon || pWeapon->GetOwner() != pPlayer)
+		return;
+
+	int iAmmoType = pWeapon->GetPrimaryAmmoType();
+	if (iAmmoType <= 0)
+		return;
+
+	char szEntityName[64];
+	int iDropAmount = 0;
+	if (!GetAmmoDropInfo(iAmmoType, szEntityName, sizeof(szEntityName), iDropAmount))
+		return;
+
+	int iCurrentAmmo = pPlayer->GetAmmoCount(iAmmoType);
+	int iClipAmmo = pWeapon->Clip1();
+	int iTotalAvailable = iCurrentAmmo + (iClipAmmo >= 0 ? iClipAmmo : 0);
+
+	if (iTotalAvailable < iDropAmount)
+	{
+		iDropAmount = iTotalAvailable;
+	}
+
+	if (iDropAmount <= 0)
+		return;
+
+	if (iCurrentAmmo >= iDropAmount)
+	{
+		pPlayer->RemoveAmmo(iDropAmount, iAmmoType);
+	}
+	else
+	{
+		int iRemainder = iDropAmount - iCurrentAmmo;
+		if (iCurrentAmmo > 0)
+			pPlayer->RemoveAmmo(iCurrentAmmo, iAmmoType);
+		if (iClipAmmo >= 0)
+			pWeapon->SetClip1(iClipAmmo - iRemainder);
+	}
+
+	Vector vecForward;
+	AngleVectors(pPlayer->EyeAngles(), &vecForward);
+	vecForward.z = 0.0f;
+	VectorNormalize(vecForward);
+	if (vecForward.Length2D() < 0.01f)
+	{
+		vecForward = Vector(1.0f, 0.0f, 0.0f);
+	}
+
+	Vector vecStart = pPlayer->GetAbsOrigin() + Vector(0, 0, 24.0f);
+	Vector vecTarget = vecStart + (vecForward * 60.0f);
+
+	trace_t tr;
+	UTIL_TraceHull(vecStart, vecTarget, Vector(-10, -10, 0), Vector(10, 10, 16), MASK_SOLID, pPlayer, COLLISION_GROUP_DEBRIS, &tr);
+
+	CBaseEntity* pAmmoDrop = CreateEntityByName(szEntityName);
+	if (pAmmoDrop)
+	{
+		pAmmoDrop->SetAbsOrigin(tr.endpos);
+		DispatchSpawn(pAmmoDrop);
+		pAmmoDrop->Activate();
+
+		Vector vecVelocity = vecForward * 160.0f + Vector(0, 0, 90.0f);
+		pAmmoDrop->SetAbsVelocity(vecVelocity);
+
+		IPhysicsObject* pPhys = pAmmoDrop->VPhysicsGetObject();
+		if (pPhys)
+		{
+			pPhys->SetVelocity(&vecVelocity, NULL);
+		}
+	}
+}
+static ConCommand backpack_drop_ammo("backpack_drop_ammo", backpack_drop_ammo_f, "Drops player ammo of a specific weapon from the backpack UI", FCVAR_CLIENTCMD_CAN_EXECUTE);

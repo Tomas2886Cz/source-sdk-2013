@@ -1,0 +1,27 @@
+"GashuntCampaigns"
+{
+    "main_campaign"
+    {
+        "persist_entities"  ""
+        "ui_name"           "Campaign 1"
+        "ui_description"    "Description Goes Here"
+        "ui_thumbnail"      "gashunt/campaign1"
+        "first_map"         "dm_runoff"
+    }
+    "second_campaign"
+    {
+        "persist_entities"  ""
+        "ui_name"           "Campaign 2"
+        "ui_description"    "Campaign Name Goes Here"
+        "ui_thumbnail"      "gashunt/campaign2"
+        "first_map"         "hl2dm_map4"
+    }
+    "third_campaign"
+    {
+        "persist_entities"  ""
+        "ui_name"           "Campaign 3"
+        "ui_description"    "Campaign Name Goes Here"
+        "ui_thumbnail"      "gashunt/campaign3"
+        "first_map"         "hl2dm_map4"
+    }	
+}

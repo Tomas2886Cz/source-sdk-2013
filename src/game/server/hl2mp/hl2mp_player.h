@@ -78,6 +78,16 @@ public:
 	virtual void DeathSound(const CTakeDamageInfo& info);
 	virtual CBaseEntity* EntSelectSpawnPoint(void);
 
+	// Backpack Inventory system hooks & state
+	CNetworkVar(bool, m_bBackpackOpen);
+	CNetworkHandle(CBaseEntity, m_hBackpackModel);
+
+	bool IsBackpackOpen() const { return m_bBackpackOpen; }
+	void SetBackpackOpen(bool bOpen);
+
+	void DropSelectedInventoryItem();
+	void SwitchToBlueprintWeapon(const char* szClassname);
+
 	// Command intercept hook to disable jumping and use inputs
 	virtual void PlayerRunCommand(CUserCmd* ucmd, IMoveHelper* moveHelper) OVERRIDE;
 

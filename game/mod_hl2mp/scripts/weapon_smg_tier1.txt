@@ -1,0 +1,115 @@
+// Small Machine Gun 1
+
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"	"#MODHL2MP_SMG_Tier1"
+	"viewmodel"			"models/weapons/v_smg_tier1.mdl"
+	"playermodel"			"models/weapons/w_smg_tier1.mdl"	//FIXME: 
+	"anim_prefix"			"smg2"
+	"bucket"				"2"
+	"bucket_position"		"0"
+
+	"clip_size"				"20"
+	"clip2_size"			"-1"
+
+	"default_clip"			"10"
+	"default_clip2"			"-1"
+
+	"primary_ammo"			"SMG1"
+	"secondary_ammo"		""
+
+	"weight"				"3"
+	"item_flags"			"0"
+	"damage"			"5"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+		"reload"			"Weapon_SMG_Tier1.Reload"
+		"reload_npc"		"Weapon_SMG_Tier1.NPC_Reload"
+		"empty"				"Weapon_SMG_Tier1.Empty"
+		"single_shot"		"Weapon_SMG_Tier1.Single"
+		"single_shot_npc"	"Weapon_SMG_Tier1.NPC_Single"
+		"special1"			"Weapon_SMG_Tier1.Special1"
+		"special2"			"Weapon_SMG_Tier1.Special2"
+		"double_shot"		"Weapon_SMG_Tier1.Double"
+		"burst"				"Weapon_SMG_Tier1.Burst"
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+	
+		//"weapon"
+		//{
+		//	"font"		"CSSWeapons"
+		//	"character"	"q"		
+		//	file vgui/weapon_icons/icon_smg_tier1
+		//	x 0
+		//	y 0
+		//	width 128
+		//	height 64
+		//}
+		//"weapon_s"
+		//{	
+		//	"font"		"CSSWeapons"
+		//	"character"	"q"		
+		//	file vgui/weapon_icons/icon_smg_tier1
+		//	x 0
+		//	y 0
+		//	width 128
+		//	height 64
+		//}	
+		//"weapon_small"
+		//{
+		//		"font"		"CSSWeaponsSmall"
+		//		"character"	"q"
+		//}
+		"weapon"
+		{
+				"font"		"CSSWeapons"
+				"character"	"x"
+		}
+		"weapon_s"
+		{	
+				"font"		"CSSWeapons"
+				"character"	"x"
+		}
+		"weapon_small"
+		{
+				"font"		"CSSWeaponsSmall"
+				"character"	"x"
+		}		
+		"ammo"
+		{
+				"font"		"WeaponIconsSmall"
+				"character"	"r"
+		}
+		"ammo2"
+		{
+				"font"		"WeaponIconsSmallSecondary"
+				"character"	"t"
+		}
+		"crosshair"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
+		}
+		"autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
+		}
+	}
+}

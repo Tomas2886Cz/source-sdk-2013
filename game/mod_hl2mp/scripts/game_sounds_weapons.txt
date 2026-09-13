@@ -1565,3 +1565,584 @@
 	"soundlevel"  	"SNDLVL_70dB"
 	"wave"	"weapons/tripwire/mine_activate.wav"
 }
+
+
+// Tombert - weapon_grenadelauncher_pump
+
+"Weapon_GrenadeLauncher_Pump.Fire"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/grenadelauncher_pump/grenadelauncherpump_fire.wav"
+}
+
+"Weapon_GrenadeLauncher_Pump.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/grenadelauncher_pump/forward.wav"
+}
+
+// Tombert - Pistol Tier 1
+
+"Weapon_Pistol_Tier1.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/pistol_tier1/pistol_tier1_reload1.wav"
+}
+
+"Weapon_Pistol_Tier1.NPC_Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg1/smg1_reload.wav"
+}
+
+"Weapon_Pistol_Tier1.Empty"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/pistol_tier1/pistol_tier1_empty.wav"
+}
+
+"Weapon_Pistol_Tier1.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.55"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,102"
+
+	"wave"		")weapons/pistol_tier1/pistol_tier1_fire2.wav"
+}
+
+"Weapon_Pistol_Tier1.NPC_Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"90,120"
+
+	"wave"		"^weapons/pistol_tier1/pistol_tier1_fire3.wav"
+}
+
+"Weapon_Pistol_Tier1.Special1"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/smg1/switch_single.wav"
+}
+
+"Weapon_Pistol_Tier1.Special2"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	")SNDLVL_NORM"
+
+	"wave"			"weapons/smg1/switch_burst.wav"
+}
+
+"Weapon_Pistol_Tier1.Burst"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,105"
+
+	"wave"			"^weapons/smg1/smg1_fireburst1.wav"
+}
+
+
+
+
+// Tombert - Pistol Tier 2
+
+"Weapon_Pistol_Tier2.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/pistol_tier2/pistol_tier2_reload1.wav"
+}
+
+"Weapon_Pistol_Tier2.NPC_Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg1/smg1_reload.wav"
+}
+
+"Weapon_Pistol_Tier2.Empty"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/pistol_tier2/pistol_tier1_empty.wav"
+}
+
+"Weapon_Pistol_Tier2.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.55"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,102"
+
+	"wave"		")weapons/pistol_tier2/pistol_tier2_fire2.wav"
+}
+
+"Weapon_Pistol_Tier2.NPC_Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"90,120"
+
+	"wave"		"^weapons/pistol_tier2/pistol_tier2_fire3.wav"
+}
+
+"Weapon_Pistol_Tier2.Special1"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		")weapons/smg1/switch_single.wav"
+}
+
+"Weapon_Pistol_Tier2.Special2"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	")SNDLVL_NORM"
+
+	"wave"			"weapons/smg1/switch_burst.wav"
+}
+
+"Weapon_Pistol_Tier2.Burst"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,105"
+
+	"wave"			"^weapons/smg1/smg1_fireburst1.wav"
+}
+
+
+// Tombert - SMG Tier 1
+
+"Weapon_SMG_Tier1.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg_tier1/smg_tier1_reload.wav"
+}
+
+"Weapon_SMG_Tier1.NPC_Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg_tier1/smg_tier1_reload.wav"
+}
+
+"Weapon_SMG_Tier1.Empty"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/pistol/pistol_empty.wav"
+}
+
+"Weapon_SMG_Tier1.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.55"
+	"soundlevel"		"SNDLVL_90db"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+
+	"wave"			")weapons/smg_tier1/smg_tier1_fire1.wav"
+}
+
+"Weapon_SMG_Tier1.Double"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.61"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+
+	"wave"		")weapons/ar2/ar2_altfire.wav"
+}
+
+
+"Weapon_SMG_Tier1.NPC_Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+
+	"wave"			"^weapons/smg_tier1/npc_smg_tier1_fire1.wav"
+}
+
+"Weapon_SMG_Tier1.Special1"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg_tier1/switch_single.wav"
+}
+
+"Weapon_SMG_Tier1.Special2"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"weapons/smg_tier1/switch_burst.wav"
+}
+
+"Weapon_SMG_Tier1.Burst"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,105"
+
+	"wave"		"^weapons/smg_tier1/smg_tier1_fire1.wav"
+
+}
+
+// Tombert - SMG Tier 2
+
+"Weapon_SMG_Tier2.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg_tier2/smg_tier2_reload.wav"
+}
+
+"Weapon_SMG_Tier2.NPC_Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg_tier2/smg_tier2_reload.wav"
+}
+
+"Weapon_SMG_Tier2.Empty"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/pistol/pistol_empty.wav"
+}
+
+"Weapon_SMG_Tier2.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.55"
+	"soundlevel"		"SNDLVL_90db"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+
+	"wave"			")weapons/smg_tier2/smg_tier2_fire1.wav"
+}
+
+"Weapon_SMG_Tier2.Double"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.61"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+
+	"wave"		")weapons/smg_tier2/smg_tier2_altfire.wav"
+}
+
+
+"Weapon_SMG_Tier2.NPC_Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"95,105"
+
+	"wave"			"^weapons/smg_tier2/npc_smg_tier2_fire1.wav"
+}
+
+"Weapon_SMG_Tier2.Special1"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/smg_tier2/switch_single.wav"
+}
+
+"Weapon_SMG_Tier2.Special2"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"weapons/smg_tier2/switch_burst.wav"
+}
+
+"Weapon_SMG_Tier2.Burst"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,105"
+
+	"wave"		"^weapons/smg_tier2/smg_fire2.wav"
+
+}
+
+// weapon_doublebarrel.txt
+"Weapon_DoubleBarrel.Empty"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+	"pitch"			"95,100"
+
+	"wave"			"weapons/doublebarrel/doublebarrel_empty.wav"
+}
+
+"Weapon_DoubleBarrel.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"			"weapons/doublebarrel/doublebarrel_reload1.wav"
+		"wave"			"weapons/doublebarrel/doublebarrel_reload2.wav"
+		"wave"			"weapons/doublebarrel/doublebarrel_reload3.wav"
+	}
+}
+
+"Weapon_DoubleBarrel.Special1"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/doublebarrel/doublebarrel_cock.wav"
+}
+
+"Weapon_DoubleBarrel.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.86"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,101"
+	"rndwave"
+	{
+	//	"wave"			"weapons/doublebarrel/doublebarrel_fire2.wav"
+	//	"wave"			"weapons/doublebarrel/doublebarrel_fire6.wav"
+		"wave"			"weapons/doublebarrel/doublebarrel_fire7.wav"
+	}
+}
+
+"Weapon_DoubleBarrel.Double"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"90,95"
+
+	"wave"			"weapons/doublebarrel/doublebarrel_dbl_fire7.wav"
+}
+
+"Weapon_DoubleBarrel.NPC_Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"			"weapons/doublebarrel/doublebarrel_reload1.wav"
+		"wave"			"weapons/doublebarrel/doublebarrel_reload2.wav"
+		"wave"			"weapons/doublebarrel/doublebarrel_reload3.wav"
+	}
+}
+
+"Weapon_DoubleBarrel.NPC_Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.95"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,101"
+
+	"wave"			"weapons/doublebarrel/doublebarrel_fire6.wav"
+}
+
+// weapon_shotgun_tier1.txt
+"Weapon_Shotgun_Tier1.Empty"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+	"pitch"			"95,100"
+
+	"wave"			"weapons/shotgun_tier1/shotgun_tier1_empty.wav"
+}
+
+"Weapon_Shotgun_Tier1.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_reload1.wav"
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_reload2.wav"
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_reload3.wav"
+	}
+}
+
+"Weapon_Shotgun_Tier1.Special1"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		"weapons/shotgun_tier1/shotgun_tier1_cock.wav"
+}
+
+"Weapon_Shotgun_Tier1.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.86"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,101"
+	"rndwave"
+	{
+	//	"wave"			"weapons/shotgun_tier1/shotgun_tier1_fire2.wav"
+	//	"wave"			"weapons/shotgun_tier1/shotgun_tier1_fire6.wav"
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_fire7.wav"
+	}
+}
+
+"Weapon_Shotgun_Tier1.Double"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"1.0"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"90,95"
+
+	"wave"			"weapons/shotgun_tier1/shotgun_tier1_dbl_fire7.wav"
+}
+
+"Weapon_Shotgun_Tier1.NPC_Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_reload1.wav"
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_reload2.wav"
+		"wave"			"weapons/shotgun_tier1/shotgun_tier1_reload3.wav"
+	}
+}
+
+"Weapon_Shotgun_Tier1.NPC_Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.95"
+	"soundlevel"	"SNDLVL_GUNFIRE"
+	"pitch"			"98,101"
+
+	"wave"			"weapons/shotgun_tier1/shotgun_tier1_fire6.wav"
+}
+
+// weapon_marksmanrifle_tier1
+"Weapon_MarksmanRifle_Tier1.Single"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"0.93"
+	"soundlevel"		"SNDLVL_GUNFIRE"
+	"pitch"			"88,93"	
+
+	"rndwave"
+	{
+		"wave"			")weapons/marksmanrifle_tier1/marksmanrifle_tier1_fire2.wav"
+		"wave"			")weapons/marksmanrifle_tier1/marksmanrifle_tier1_fire3.wav"
+	}
+}
+
+"Weapon_MarksmanRifle_Tier1.Reload"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave"			")weapons/marksmanrifle_tier1/marksmanrifle_tier1_reload1.wav"
+}
+
+"Weapon_MarksmanRifle_Tier1.OpenLoader"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave"			"weapons/marksmanrifle_tier1/marksmanrifle_tier1_reload1.wav"
+}
+
+"Weapon_MarksmanRifle_Tier1.RemoveLoader"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave"			"weapons/marksmanrifle_tier1/marksmanrifle_tier1_reload4.wav"
+}
+
+"Weapon_MarksmanRifle_Tier1.ReplaceLoader"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave"			"weapons/marksmanrifle_tier1/marksmanrifle_tier1_reload3.wav"
+}
+
+"Weapon_MarksmanRifle_Tier1.Spin"
+{
+	"channel"		"CHAN_ITEM"
+	"volume"		"0.7"
+	"soundlevel"		"SNDLVL_NORM"
+
+	"wave"			"weapons/marksmanrifle_tier1/marksmanrifle_tier1_spin1.wav"
+}

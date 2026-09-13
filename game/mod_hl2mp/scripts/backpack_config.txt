@@ -1,0 +1,18 @@
+"BackpackConfig"
+{
+    "blueprints"
+    {
+        "medkit"
+        {
+            "weapon"    "weapon_blueprint_medkit"
+            "printname" "Medical Blueprint"
+            "icon"      "vgui/backpack/medkit"
+        }
+        "turret"
+        {
+            "weapon"    "weapon_blueprint_turret"
+            "printname" "Turret Blueprint"
+            "icon"      "vgui/backpack/turret"
+        }
+    }
+}

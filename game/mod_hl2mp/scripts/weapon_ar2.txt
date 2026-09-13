@@ -8,7 +8,7 @@ WeaponData
 	"playermodel"			"models/weapons/w_irifle.mdl"
 	"anim_prefix"			"ar2"
 	"bucket"			"2"
-	"bucket_position"		"1"
+	"bucket_position"		"51"
 
 	"clip_size"			"30"
 	"default_clip"			"60"
@@ -68,16 +68,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"4"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"5"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"0"
-				"y"			"48"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"4"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"5"
 		}
 	}
 }

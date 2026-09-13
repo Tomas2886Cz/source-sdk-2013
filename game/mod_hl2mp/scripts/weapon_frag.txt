@@ -5,8 +5,8 @@ WeaponData
 	"viewmodel"				"models/weapons/v_grenade.mdl"
 	"playermodel"			"models/weapons/w_grenade.mdl"
 	"anim_prefix"			"Grenade"
-	"bucket"				"4"
-	"bucket_position"		"0"
+	"bucket"				"5"
+	"bucket_position"		"1"
 
 	"clip_size"				"-1"
 	"clip2_size"			"-1"
@@ -53,16 +53,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"48"
-				"y"			"72"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
 		}
 	}
 }

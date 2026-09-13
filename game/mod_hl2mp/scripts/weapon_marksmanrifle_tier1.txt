@@ -1,0 +1,109 @@
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"			"#MODHL2MP_MarksmanRifle_Tier1"
+
+	"viewmodel"			"models/weapons/v_marksmanrifle_tier1.mdl"
+	"playermodel"		"models/weapons/w_marksmanrifle_tier1.mdl"
+
+	"anim_prefix"		"python"
+	"bucket"			"4"
+	"bucket_position"	"1"
+
+	"clip_size"			"15"
+	"default_clip"		"15"
+	
+	"primary_ammo"		"SMG1"
+	"secondary_ammo"	"None"
+
+	"weight"			"7"
+	"item_flags"		"0"
+
+	"damage"			"11"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+		"empty"			"Weapon_MarksmanRifle_Tier1.Empty"
+		"single_shot"	"Weapon_MarksmanRifle_Tier1.Single"
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		//"weapon"
+		//{
+		//	"file" "vgui/hud/iconsheet"
+		//	"x" "320"
+		//	"y" 384
+		//	"width" "192"
+		//	"height" "64"
+		//}
+		//"weapon_s"
+		//{	
+		//	"file" "vgui/hud/iconsheet"
+		//	"x" 320
+		//	"y" 384
+		//	"width" "192"
+		//	"height" "64"
+		//}
+		"weapon"
+		{
+				"font"		"CSSWeapons"
+				"character"	"o"
+		}
+		"weapon_s"
+		{	
+				"font"		"CSSWeapons"
+				"character"	"o"
+		}
+		"weapon_small"
+		{
+				"font"		"CSSWeaponsSmall"
+				"character"	"o"
+		}
+		"ammo"
+		{
+				"font"		"WeaponIconsSmall"
+				"character"	"q"
+		}
+		"crosshair"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"b"
+		}
+		"autoaim"
+		{
+			"file"		"sprites/crosshairs"
+			"x"		"0"
+			"y"		"96"
+			"width"		"24"
+			"height"	"24"
+		}
+		"autoaim"
+		{
+			"file"		"sprites/crosshairs"
+			"x"		"0"
+			"y"		"96"
+			"width"		"24"
+			"height"	"24"
+		}
+		"zoom"
+		{
+			"file"		"sprites/hl2mmod_scopes_crossbow"
+			"x"		"0"
+			"y"		"0"
+			"width"		"2048"
+			"height"	"2048"
+		}		
+		"zoom_autoaim"
+		{
+			"file"		"sprites/hl2mmod_scopes_crossbow"
+			"x"		"0"
+			"y"		"0"
+			"width"		"2048"
+			"height"	"2048"
+		}		
+		
+	}
+}

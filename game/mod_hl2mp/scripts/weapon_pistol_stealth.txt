@@ -1,0 +1,120 @@
+// Pistol
+
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"			"#MODHL2MP_Pistol_Stealth"
+	
+	"viewmodel"			"models/weapons/doi/v_welrod.mdl"
+	"playermodel"		"models/weapons/doi/w_welrod.mdl"		
+		
+	"anim_prefix"		"anim"
+	"bucket"			"1"
+	"bucket_position"	"2"
+
+	"clip_size"			"8"
+	"primary_ammo"		"Pistol"
+	"secondary_ammo"	"None"
+
+	"weight"			"2"
+	"item_flags"		"0"
+	"damage"			"8"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+
+		"reload"			"Weapon_Pistol_Tier1.Reload"
+		"reload_npc"		"Weapon_Pistol_Tier1.NPC_Reload"
+		"empty"				"Weapon_Pistol.Empty"
+		"single_shot"		"Weapon_SMG_Tier2.Single"
+		"single_shot_npc"	"Weapon_SMG_Tier2.NPC_Single"
+		"special1"			"Weapon_Pistol.Empty"
+		"special2"			"Weapon_Pistol.Empty"
+		"double_shot"		"Weapon_SMG_Tier2.Double"
+		"burst"				"Weapon_SMG_Tier2.Burst"
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		//"weapon"
+		//{
+		//	"font"		"CSSWeapons"
+		//	"character"	"y"		
+		//	file vgui/weapon_icons/icon_pistol_tier1
+		//	x 0
+		//	y 0
+		//	width 64
+		//	height 64
+		//}
+		//"weapon_s"
+		//{	
+		//	"font"		"CSSWeapons"
+		//	"character"	"y"		
+		//	file vgui/weapon_icons/icon_pistol_tier1
+		//	x 0
+		//	y 0
+		//	width 64
+		//	height 64
+		//}
+		//"weapon_small"
+		//{
+		//		"font"		"CSSweaponsSmall"
+		//		"character"	"y"
+		//}
+		"weapon"
+		{
+				"font"		"CSSWeapons"
+				"character"	"c"
+		}
+		"weapon_s"
+		{	
+				"font"		"CSSWeapons"
+				"character"	"c"
+		}
+		"weapon_small"
+		{
+				"font"		"CSSWeaponsSmall"
+				"character"	"c"
+		}		
+		"ammo"
+		{
+				"font"		"WeaponIconsSmall"
+				"character"	"p"
+		}
+		"crosshair"
+		{
+				"font"		"HPH_HUD_Crosshair"
+				"character"	"x"
+		}
+		"zoom"
+		{
+				"font"		"HPH_HUD_Crosshair"
+				"character"	"x"
+		}
+		"autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
+		}
+	}
+	ModelBounds
+	{
+		Viewmodel
+		{
+			Mins	"-8 -4 -16"
+			Maxs	"18 9 -3"
+		}
+		World
+		{
+			Mins	"-1 -3 -2"
+			Maxs	"11 4 5"
+		}
+	}	
+}

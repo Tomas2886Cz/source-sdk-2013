@@ -1,0 +1,85 @@
+"Resource/UI/TeamJoinMenu.res"
+{
+    "TeamJoinMenu"
+    {
+        "ControlName"       "CTeamJoinMenu"
+        "fieldName"         "TeamJoinMenu"
+        "xpos"              "0"
+        "ypos"              "0"
+        "wide"              "f0"
+        "tall"              "f0"
+        "autoResize"        "0"
+        "pinCorner"         "0"
+        "visible"           "1"
+        "enabled"           "1"
+        "settitlebarvisible" "0"
+    }
+
+    "TitleLabel"
+    {
+        "ControlName"       "Label"
+        "fieldName"         "TitleLabel"
+        "xpos"              "c-200"
+        "ypos"              "c-140"
+        "wide"              "400"
+        "tall"              "35"
+        "autoResize"        "0"
+        "pinCorner"         "0"
+        "visible"           "1"
+        "enabled"           "1"
+        "labelText"         "SELECT TEAM"
+        "textAlignment"     "center"
+        "font"              "DefaultLarge"
+    }
+
+    "RebelsButton"
+    {
+        "ControlName"       "Button"
+        "fieldName"         "RebelsButton"
+        "xpos"              "c-150"
+        "ypos"              "c-70"
+        "wide"              "300"
+        "tall"              "45"
+        "autoResize"        "0"
+        "pinCorner"         "0"
+        "visible"           "1"
+        "enabled"           "1"
+        "labelText"         "JOIN REBELS"
+        "command"           "join_rebels"
+        "font"              "DefaultLarge"
+    }
+
+    "CombineButton"
+    {
+        "ControlName"       "Button"
+        "fieldName"         "CombineButton"
+        "xpos"              "c-150"
+        "ypos"              "c-10"
+        "wide"              "300"
+        "tall"              "45"
+        "autoResize"        "0"
+        "pinCorner"         "0"
+        "visible"           "1"
+        "enabled"           "1"
+        "labelText"         "JOIN COMBINE"
+        "command"           "join_combine"
+        "font"              "DefaultLarge"
+    }
+
+    "SpectateButton"
+    {
+        "ControlName"       "Button"
+        "fieldName"         "SpectateButton"
+        "xpos"              "c-150"
+        "ypos"              "c+50"
+        "wide"              "300"
+        "tall"              "45"
+        "autoResize"        "0"
+        "pinCorner"         "0"
+        "visible"           "1"
+        "enabled"           "1"
+        "labelText"         "SPECTATE"
+        "command"           "join_spectate"
+        "font"              "DefaultLarge"
+    }
+}

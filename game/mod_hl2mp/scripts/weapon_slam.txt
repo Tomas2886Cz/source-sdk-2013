@@ -7,8 +7,8 @@ WeaponData
 	"viewmodel"				"models/weapons/v_slam.mdl"
 	"playermodel"			"models/weapons/w_slam.mdl"
 	"anim_prefix"			"slam"
-	"bucket"				"4"
-	"bucket_position"		"2"
+	"bucket"				"5"
+	"bucket_position"		"3"
 
 	"clip_size"				"3"
 	"primary_ammo"			"None"
@@ -43,19 +43,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"0"
-				"y"			"48"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"i"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"j"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"48"
-				"y"			"72"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"i"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"j"
 		}
 	}
 }

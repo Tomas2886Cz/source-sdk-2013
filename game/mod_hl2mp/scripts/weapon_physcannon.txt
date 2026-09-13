@@ -8,7 +8,7 @@ WeaponData
 	"playermodel"		"models/weapons/w_Physics.mdl"
 	"anim_prefix"		"gauss"
 	"bucket"			"0"
-	"bucket_position"	"2"
+	"bucket_position"	"52"
 	"clip_size"			"0"
 	"clip2_size"		"0"
 	"primary_ammo"		"None"
@@ -55,16 +55,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"i"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"j"
 		}
 		"autoaim"
 		{
-			"file"		"sprites/crosshairs"
-			"x"			"48"
-			"y"			"72"
-			"width"		"24"
-			"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"i"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"j"
 		}
 	}
 }

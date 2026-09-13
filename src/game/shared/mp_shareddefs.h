@@ -215,4 +215,6 @@ enum
 extern const char *g_pszMPConcepts[];
 int GetMPConceptIndexFromString( const char *pszConcept );
 
+bool GetAmmoDropInfo(int iAmmoIndex, char* pszEntityNameOut, int iMaxLen, int& iDropAmountOut);
+
 #endif // MP_SHAREDDEFS_H

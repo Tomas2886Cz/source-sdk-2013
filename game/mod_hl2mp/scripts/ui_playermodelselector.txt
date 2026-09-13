@@ -1,0 +1,83 @@
+"PlayerModels"
+{
+    "1"
+    {
+        "model"         "models/humans/group03/male_01.mdl"
+        "name"          "Rebel Male 1"
+        "team"          "2"
+        "weapon"        "models/weapons/w_smg1.mdl"
+        "animation"     "run_crossbow"
+    }
+    "2"
+    {
+        "model"         "models/humans/group03/male_02.mdl"
+        "name"          "Rebel Male 2"
+        "team"          "2"
+        "weapon"        "models/weapons/w_shotgun.mdl"
+        "animation"     "run_crossbow"
+    }
+    "3"
+    {
+        "model"         "models/humans/group03/female_01.mdl"
+        "name"          "Rebel Female 1"
+        "team"          "2"
+        "weapon"        "models/weapons/w_irifle.mdl"
+        "animation"     "run_crossbow"
+    }
+    "4"
+    {
+        "model"         "models/humans/group03/female_02.mdl"
+        "name"          "Rebel Female 2"
+        "team"          "2"
+        "weapon"        "models/weapons/w_pistol.mdl"
+        "animation"     "run_crossbow"
+    }
+    "5"
+    {
+        "model"         "models/humans/group03/male_03.mdl"
+        "name"          "Rebel Male 3"
+        "team"          "2"
+        "weapon"        "models/weapons/w_crossbow.mdl"
+        "animation"     "run_crossbow"
+    }
+    "6"
+    {
+        "model"         "models/combine_soldier.mdl"
+        "name"          "Combine Soldier"
+        "team"          "3"
+        "weapon"        "models/weapons/w_irifle.mdl"
+        "animation"     "run_crossbow"
+    }
+    "7"
+    {
+        "model"         "models/combine_soldier_prisonguard.mdl"
+        "name"          "Prison Guard"
+        "team"          "3"
+        "weapon"        "models/weapons/w_shotgun.mdl"
+        "animation"     "run_crossbow"
+    }
+    "8"
+    {
+        "model"         "models/combine_super_soldier.mdl"
+        "name"          "Elite Soldier"
+        "team"          "3"
+        "weapon"        "models/weapons/w_irifle.mdl"
+        "animation"     "run_crossbow"
+    }
+    "9"
+    {
+        "model"         "models/police.mdl"
+        "name"          "Metrocop"
+        "team"          "3"
+        "weapon"        "models/weapons/w_pistol.mdl"
+        "animation"     "run_crossbow"
+    }
+    "10"
+    {
+        "model"         "models/combine_soldier.mdl"
+        "name"          "Shotgunner"
+        "team"          "3"
+        "weapon"        "models/weapons/w_shotgun.mdl"
+        "animation"     "run_crossbow"
+    }
+}

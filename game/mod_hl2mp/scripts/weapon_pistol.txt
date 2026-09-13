@@ -8,14 +8,14 @@ WeaponData
 	"playermodel"		"models/weapons/w_pistol.mdl"
 	"anim_prefix"		"pistol"
 	"bucket"			"1"
-	"bucket_position"	"0"
+	"bucket_position"	"50"
 
 	"clip_size"			"18"
 	"primary_ammo"		"Pistol"
 	"secondary_ammo"	"None"
 
 	"weight"			"2"
-	"item_flags"			"0"
+	"item_flags"		"0"
 	"damage"			"8"
 
 	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
@@ -57,16 +57,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"0"
-				"y"			"48"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
 		}
 	}
 }

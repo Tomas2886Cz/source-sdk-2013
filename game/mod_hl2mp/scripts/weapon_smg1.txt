@@ -8,7 +8,7 @@ WeaponData
 	"playermodel"			"models/weapons/w_smg1.mdl"	//FIXME: 
 	"anim_prefix"			"smg2"
 	"bucket"				"2"
-	"bucket_position"		"0"
+	"bucket_position"		"50"
 
 	"clip_size"				"45"
 	"clip2_size"			"-1"
@@ -67,16 +67,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"0"
-				"y"			"48"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
 		}
 	}
 }

@@ -1,0 +1,63 @@
+"ServerOptions"
+{
+    "hostname"
+    {
+        "label"     "Hostname"
+        "type"      "string"
+        "default"   "server"
+    }
+    "sv_password"
+    {
+        "label"     "Server password"
+        "type"      "string"
+        "default"   ""
+    }
+    "maxplayers"
+    {
+        "label"     "Max. players"
+        "type"      "string"
+        "default"   "32"
+    }
+    "mp_timelimit"
+    {
+        "label"     "Time Limit (Min.)"
+        "type"      "string"
+        "default"   "0"
+    }
+    "mp_fraglimit"
+    {
+        "label"     "Frag Limit"
+        "type"      "string"
+        "default"   "0"
+    }
+    "mp_teamplay"
+    {
+        "label"     "Teamplay"
+        "type"      "bool"
+        "default"   "1"
+    }
+    "mp_weaponstay"
+    {
+        "label"     "Weapons Stay"
+        "type"      "bool"
+        "default"   "0"
+    }
+    "mp_footsteps"
+    {
+        "label"     "Footsteps"
+        "type"      "bool"
+        "default"   "1"
+    }
+    "mp_flashlight"
+    {
+        "label"     "Flashlight"
+        "type"      "bool"
+        "default"   "1"
+    }
+    "mp_forcerespawn"
+    {
+        "label"     "Force Respawn"
+        "type"      "bool"
+        "default"   "0"
+    }
+}

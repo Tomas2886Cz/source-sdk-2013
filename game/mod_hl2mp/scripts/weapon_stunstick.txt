@@ -8,7 +8,7 @@ WeaponData
 	"playermodel"			"models/weapons/w_stunbaton.mdl"
 	"anim_prefix"			"stunbaton"
 	"bucket"				"0"
-	"bucket_position"		"1"
+	"bucket_position"		"51"
 
 	"clip_size"				"-1"
 	"primary_ammo"			"None"
@@ -60,16 +60,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
 		}
 		"autoaim"
 		{
-			"file"		"sprites/crosshairs"
-			"x"			"0"
-			"y"			"48"
-			"width"		"24"
-			"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"3"
 		}
 	}
 }

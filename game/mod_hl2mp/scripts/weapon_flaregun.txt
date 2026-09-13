@@ -1,0 +1,74 @@
+// Flare Gun
+ 
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"				"#MODHL2MP_FlareGun"
+	//"viewmodel"			"models/env/weapons/flaregun/v_flaregun.mdl"
+	//"playermodel"			"models/env/weapons/flaregun/flaregun.mdl"	
+	"viewmodel"				"models/weapons/v_dkflaregun.mdl"
+	"playermodel"			"models/weapons/w_dkflaregun.mdl"
+	
+	"anim_prefix"			"python"		
+	"bucket"				"6"
+	"bucket_position"		"0"
+ 
+	"clip_size"				"1"
+	"primary_ammo"			"FlareRound"
+	"secondary_ammo"		"None"
+ 
+	"default_clip"			"50"
+ 
+	"weight"				"0"
+	"item_flags"			"0"
+ 
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+		"single_shot"		"Weapon_FlareGun.Single"
+		"reload"			"Weapon_FlareGun.Reload"
+	}
+ 
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		"weapon"
+		{
+			file vgui/weapon_icons/icon_flaregun
+			x 0
+			y 0
+			width 128
+			height 128
+		}
+		"weapon_s"
+		{
+			file vgui/weapon_icons/icon_flaregun_selected
+			x 0
+			y 0
+			width 128
+			height 128
+		}
+		"ammo"
+		{
+				"file"		"sprites/a_icons1"
+				"x"			"55"
+				"y"			"130"
+				"width"		"73"
+				"height"	"20"
+		}
+		"crosshair" 
+		{
+				"font"		"HPH_HUD_Crosshair"
+				//"character"	"6"
+				"character" ""
+		}		
+		"autoaim"
+		{
+				"file"		"sprites/crosshairs"
+				"x"			"0"
+				"y"			"48"
+				"width"		"24"
+				"height"	"24"
+		}
+	}
+}

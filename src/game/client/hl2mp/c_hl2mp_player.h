@@ -46,6 +46,12 @@ public:
 	DECLARE_PREDICTABLE();
 	DECLARE_INTERPOLATION();
 
+public:
+	bool m_bBackpackOpen;
+	CHandle<C_BaseEntity> m_hBackpackModel;
+
+	bool IsBackpackOpen() const { return m_bBackpackOpen; }
+
 	//hmm
 	CHandle<C_HL2MP_Player> m_hRevivingTeammate;
 

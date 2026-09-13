@@ -1,0 +1,112 @@
+// Pistol
+
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"	"#MODHL2MP_Pistol_Tier2"
+	
+	//"viewmodel"		"models/weapons/v_pistol_tier2.mdl"
+	//"playermodel"		"models/weapons/w_pistol_tier2.mdl"
+	
+	//"viewmodel"		"models/weapons/doi/v_c96.mdl"
+	//"playermodel"		"models/weapons/doi/w_c96.mdl"
+	
+	"viewmodel"		"models/weapons/doi/v_c96.mdl"
+	"playermodel"	"models/weapons/doi/w_c96.mdl"		
+	
+	"anim_prefix"		"pistol"
+	"bucket"			"1"
+	"bucket_position"	"1"
+
+	"clip_size"			"12"
+	"primary_ammo"		"Pistol"
+	"secondary_ammo"	"None"
+
+	"weight"			"2"
+	"item_flags"			"0"
+	"damage"			"10"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+
+		"reload"		"Weapon_Pistol_Tier2.Reload"
+		"reload_npc"	"Weapon_Pistol_Tier2.NPC_Reload"
+		"empty"			"Weapon_Pistol_Tier2.Empty"
+		"single_shot"	"Weapon_Pistol_Tier2.Single"
+		"single_shot_npc"	"Weapon_Pistol_Tier2.NPC_Single"
+		"special1"		"Weapon_Pistol_Tier2.Special1"
+		"special2"		"Weapon_Pistol_Tier2.Special2"
+		"burst"			"Weapon_Pistol_Tier2.Burst"
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		//"weapon"
+		//{
+		//	"font"		"CSSWeapons"
+		//	"character"	"a"		
+		//	file vgui/weapon_icons/icon_pistol_tier2
+		//	x 0
+		//	y 0
+		//	width 64
+		//	height 64
+		//}
+		//"weapon_s"
+		//{	
+		//	"font"		"CSSWeapons"
+		//	"character"	"a"		
+		//	file vgui/weapon_icons/icon_pistol_tier2
+		//	x 0
+		//	y 0
+		//	width 64
+		//	height 64
+		//}
+		//"weapon_small"
+		//{
+		//		"font"		"CSSWeaponsSmall"
+		//		"character"	"a"
+		//}
+		"weapon"
+		{
+				"font"		"CSSWeapons"
+				"character"	"u"
+		}
+		"weapon_s"
+		{	
+				"font"		"CSSWeapons"
+				"character"	"u"
+		}
+		"weapon_small"
+		{
+				"font"		"CSSWeaponsSmall"
+				"character"	"u"
+		}		
+		"ammo"
+		{
+				"font"		"WeaponIconsSmall"
+				"character"	"p"
+		}
+		"crosshair"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
+		}
+		"autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"2"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"1"
+		}
+	}
+}

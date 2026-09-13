@@ -35,13 +35,70 @@ int ITEM_GiveAmmo( CBasePlayer *pPlayer, float flCount, const char *pszAmmoName,
 	return pPlayer->GiveAmmo( flCount, iAmmoType, bSuppressSound );
 }
 
+ConVar sv_ammo_require_use("sv_ammo_require_use", "1", FCVAR_GAMEDLL | FCVAR_NOTIFY, "Require players to press the USE key to pick up ammo (1 = USE key required, 0 = default walk-over touch pickup).");
+
+//=============================================================================
+// >> Base class for all HL2MP ammo pickups with toggleable USE pickup
+//=============================================================================
+class CItem_Ammo : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_Ammo, CItem);
+
+	virtual void ItemTouch(CBaseEntity* pOther)
+	{
+		// If ConVar is enabled, block touch pickups (walk-over)
+		if (sv_ammo_require_use.GetBool())
+			return;
+
+		// Revert to standard walk-over touch pickup
+		BaseClass::ItemTouch(pOther);
+	}
+
+	virtual int ObjectCaps(void)
+	{
+		int caps = BaseClass::ObjectCaps();
+		if (sv_ammo_require_use.GetBool())
+		{
+			caps |= FCAP_IMPULSE_USE;
+		}
+		return caps;
+	}
+
+	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+	{
+		// Only allow USE key pickup if ConVar is active
+		if (!sv_ammo_require_use.GetBool())
+			return;
+
+		CBasePlayer* pPlayer = ToBasePlayer(pActivator);
+		if (!pPlayer || !pPlayer->IsAlive())
+			return;
+
+		if (MyTouch(pPlayer))
+		{
+			SetTouch(NULL);
+			SetThink(NULL);
+
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_YES)
+			{
+				Respawn();
+			}
+			else
+			{
+				UTIL_Remove(this);
+			}
+		}
+	}
+};
+
 // ========================================================================
 //	>> TOMBERT Medkit
 // ========================================================================
-class CItem_Medkit : public CItem
+class CItem_Medkit : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS(CItem_Medkit, CItem);
+	DECLARE_CLASS(CItem_Medkit, CItem_Ammo);
 
 	void Spawn(void)
 	{
@@ -74,10 +131,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_medkit, CItem_Medkit);
 // ========================================================================
 //	>> TOMBERT SCRAP WEAPON
 // ========================================================================
-class CItem_ScrapWeapon : public CItem
+class CItem_ScrapWeapon : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS(CItem_ScrapWeapon, CItem);
+	DECLARE_CLASS(CItem_ScrapWeapon, CItem_Ammo);
 
 	void Spawn(void)
 	{
@@ -113,10 +170,10 @@ LINK_ENTITY_TO_CLASS(item_scrap_weapon, CItem_ScrapWeapon);
 // ========================================================================
 //	>> TOMBERT SCRAP MEDICAL
 // ========================================================================
-class CItem_ScrapMedical : public CItem
+class CItem_ScrapMedical : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS(CItem_ScrapMedical, CItem);
+	DECLARE_CLASS(CItem_ScrapMedical, CItem_Ammo);
 
 	void Spawn(void)
 	{
@@ -152,10 +209,10 @@ LINK_ENTITY_TO_CLASS(item_scrap_medical, CItem_ScrapMedical);
 // ========================================================================
 //	>> TOMBERT SCRAP UTILITY
 // ========================================================================
-class CItem_ScrapUtility : public CItem
+class CItem_ScrapUtility : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS(CItem_ScrapUtility, CItem);
+	DECLARE_CLASS(CItem_ScrapUtility, CItem_Ammo);
 
 	void Spawn(void)
 	{
@@ -191,10 +248,10 @@ LINK_ENTITY_TO_CLASS(item_scrap_utility, CItem_ScrapUtility);
 // ========================================================================
 //	>> TOMBERT GRENADE LAUNCHER MUNICE GLGRENADE AMMO
 // ========================================================================
-class CItem_GLGrenade : public CItem
+class CItem_GLGrenade : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS(CItem_GLGrenade, CItem);
+	DECLARE_CLASS(CItem_GLGrenade, CItem_Ammo);
 
 	void Spawn(void)
 	{
@@ -228,10 +285,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_glgrenade, CItem_GLGrenade);
 // ========================================================================
 //	>> BoxSRounds
 // ========================================================================
-class CItem_BoxSRounds : public CItem
+class CItem_BoxSRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxSRounds, CItem );
+	DECLARE_CLASS( CItem_BoxSRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -268,10 +325,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_pistol, CItem_BoxSRounds);
 // ========================================================================
 //	>> LargeBoxSRounds
 // ========================================================================
-class CItem_LargeBoxSRounds : public CItem
+class CItem_LargeBoxSRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_LargeBoxSRounds, CItem );
+	DECLARE_CLASS( CItem_LargeBoxSRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -306,10 +363,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_pistol_large, CItem_LargeBoxSRounds);
 // ========================================================================
 //	>> BoxMRounds
 // ========================================================================
-class CItem_BoxMRounds : public CItem
+class CItem_BoxMRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxMRounds, CItem );
+	DECLARE_CLASS( CItem_BoxMRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -344,10 +401,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_smg1, CItem_BoxMRounds);
 // ========================================================================
 //	>> LargeBoxMRounds
 // ========================================================================
-class CItem_LargeBoxMRounds : public CItem
+class CItem_LargeBoxMRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_LargeBoxMRounds, CItem );
+	DECLARE_CLASS( CItem_LargeBoxMRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -382,10 +439,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_smg1_large, CItem_LargeBoxMRounds);
 // ========================================================================
 //	>> BoxLRounds
 // ========================================================================
-class CItem_BoxLRounds : public CItem
+class CItem_BoxLRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxLRounds, CItem );
+	DECLARE_CLASS( CItem_BoxLRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -420,10 +477,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_ar2, CItem_BoxLRounds);
 // ========================================================================
 //	>> LargeBoxLRounds
 // ========================================================================
-class CItem_LargeBoxLRounds : public CItem
+class CItem_LargeBoxLRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_LargeBoxLRounds, CItem );
+	DECLARE_CLASS( CItem_LargeBoxLRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -460,10 +517,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_ar2_large, CItem_LargeBoxLRounds);
 // ========================================================================
 //	>> CItem_Box357Rounds
 // ========================================================================
-class CItem_Box357Rounds : public CItem
+class CItem_Box357Rounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_Box357Rounds, CItem );
+	DECLARE_CLASS( CItem_Box357Rounds, CItem_Ammo);
 
 	void Precache( void )
 	{
@@ -499,10 +556,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_357, CItem_Box357Rounds);
 // ========================================================================
 //	>> CItem_LargeBox357Rounds
 // ========================================================================
-class CItem_LargeBox357Rounds : public CItem
+class CItem_LargeBox357Rounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_LargeBox357Rounds, CItem );
+	DECLARE_CLASS( CItem_LargeBox357Rounds, CItem_Ammo);
 
 	void Precache( void )
 	{
@@ -538,10 +595,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_357_large, CItem_LargeBox357Rounds);
 // ========================================================================
 //	>> CItem_BoxXBowRounds
 // ========================================================================
-class CItem_BoxXBowRounds : public CItem
+class CItem_BoxXBowRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxXBowRounds, CItem );
+	DECLARE_CLASS( CItem_BoxXBowRounds, CItem_Ammo);
 
 	void Precache( void )
 	{
@@ -578,10 +635,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_crossbow, CItem_BoxXBowRounds);
 // ========================================================================
 //	>> FlareRound
 // ========================================================================
-class CItem_FlareRound : public CItem
+class CItem_FlareRound : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_FlareRound, CItem );
+	DECLARE_CLASS( CItem_FlareRound, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -617,10 +674,10 @@ LINK_ENTITY_TO_CLASS(item_flare_round, CItem_FlareRound);
 // ========================================================================
 #define SIZE_BOX_FLARE_ROUNDS 5
 
-class CItem_BoxFlareRounds : public CItem
+class CItem_BoxFlareRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxFlareRounds, CItem );
+	DECLARE_CLASS( CItem_BoxFlareRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -650,10 +707,10 @@ LINK_ENTITY_TO_CLASS(item_box_flare_rounds, CItem_BoxFlareRounds);
 // ========================================================================
 // RPG Round
 // ========================================================================
-class CItem_RPG_Round : public CItem
+class CItem_RPG_Round : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_RPG_Round, CItem );
+	DECLARE_CLASS( CItem_RPG_Round, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -688,10 +745,10 @@ LINK_ENTITY_TO_CLASS( item_rpg_round, CItem_RPG_Round );
 // ========================================================================
 //	>> AR2_Grenade
 // ========================================================================
-class CItem_AR2_Grenade : public CItem
+class CItem_AR2_Grenade : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_AR2_Grenade, CItem );
+	DECLARE_CLASS( CItem_AR2_Grenade, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -728,10 +785,10 @@ LINK_ENTITY_TO_CLASS(item_ammo_smg1_grenade, CItem_AR2_Grenade);
 // ========================================================================
 #define SIZE_BOX_SNIPER_ROUNDS 10
 
-class CItem_BoxSniperRounds : public CItem
+class CItem_BoxSniperRounds : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxSniperRounds, CItem );
+	DECLARE_CLASS( CItem_BoxSniperRounds, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -762,10 +819,10 @@ LINK_ENTITY_TO_CLASS(item_box_sniper_rounds, CItem_BoxSniperRounds);
 // ========================================================================
 //	>> BoxBuckshot
 // ========================================================================
-class CItem_BoxBuckshot : public CItem
+class CItem_BoxBuckshot : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_BoxBuckshot, CItem );
+	DECLARE_CLASS( CItem_BoxBuckshot, CItem_Ammo);
 
 	void Spawn( void )
 	{ 
@@ -798,10 +855,10 @@ LINK_ENTITY_TO_CLASS(item_box_buckshot, CItem_BoxBuckshot);
 // ========================================================================
 //	>> CItem_AR2AltFireRound
 // ========================================================================
-class CItem_AR2AltFireRound : public CItem
+class CItem_AR2AltFireRound : public CItem_Ammo
 {
 public:
-	DECLARE_CLASS( CItem_AR2AltFireRound, CItem );
+	DECLARE_CLASS( CItem_AR2AltFireRound, CItem_Ammo);
 
 	void Precache( void )
 	{

@@ -1,0 +1,13 @@
+"EntityOutlines"
+{
+    "CHL2MP_Player"
+    {
+        "color"     "0 255 0 255"
+        "distance"  "1500.0"
+    }
+    "CWeaponCrossbow"
+    {
+        "color"     "255 165 0 255"
+        "distance"  "800.0"
+    }
+}

@@ -1,0 +1,81 @@
+"Filters"
+{
+	"gamelist"		"internet"
+	"Filters"
+	{
+		"CustomGames"
+		{
+			"MaxPlayerCount"		"0"
+			"ping"		"0"
+			"location"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+			"QuickList"		"0"
+			"tagsinclude"		"0"
+			"Replay"		"0"
+		}
+		"SpectateGames"
+		{
+			"MaxPlayerCount"		"0"
+			"ping"		"0"
+			"location"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+			"QuickList"		"0"
+			"tagsinclude"		"0"
+			"Replay"		"0"
+		}
+		"FavoriteGames"
+		{
+			"MaxPlayerCount"		"0"
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+			"QuickList"		"0"
+			"tagsinclude"		"0"
+			"Replay"		"0"
+		}
+		"LanGames"
+		{
+			"MaxPlayerCount"		"0"
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+			"QuickList"		"0"
+			"tagsinclude"		"0"
+			"Replay"		"0"
+		}
+		"FriendsGames"
+		{
+			"MaxPlayerCount"		"0"
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+			"QuickList"		"0"
+			"tagsinclude"		"0"
+			"Replay"		"0"
+		}
+		"HistoryGames"
+		{
+			"MaxPlayerCount"		"0"
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+			"QuickList"		"0"
+			"tagsinclude"		"0"
+			"Replay"		"0"
+		}
+	}
+}

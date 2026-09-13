@@ -6,6 +6,85 @@
 
 #include "cbase.h"
 #include "mp_shareddefs.h"
+#include "ammodef.h"
+#include "filesystem.h"
+#include <KeyValues.h>
+
+bool GetAmmoDropInfo(int iAmmoIndex, char* pszEntityNameOut, int iMaxLen, int& iDropAmountOut)
+{
+	Ammo_t* pAmmo = GetAmmoDef()->GetAmmoOfIndex(iAmmoIndex);
+	if (!pAmmo || !pAmmo->pName || pAmmo->pName[0] == '\0')
+		return false;
+
+	const char* pszAmmoName = pAmmo->pName;
+
+	static KeyValues* s_pAmmoConfig = NULL;
+	static bool s_bLoaded = false;
+
+	if (!s_bLoaded)
+	{
+		s_bLoaded = true;
+		s_pAmmoConfig = new KeyValues("AmmoDrops");
+		if (!s_pAmmoConfig->LoadFromFile(filesystem, "scripts/ammo_drops.txt", "MOD"))
+		{
+			s_pAmmoConfig->LoadFromFile(filesystem, "scripts/ammo_drops.txt", "GAME");
+		}
+	}
+
+	if (s_pAmmoConfig)
+	{
+		KeyValues* pSub = s_pAmmoConfig->FindKey(pszAmmoName);
+		if (pSub)
+		{
+			const char* pszEnt = pSub->GetString("entity", "");
+			int iAmt = pSub->GetInt("amount", 0);
+
+			if (pszEnt && pszEnt[0] != '\0' && iAmt > 0)
+			{
+				Q_strncpy(pszEntityNameOut, pszEnt, iMaxLen);
+				iDropAmountOut = iAmt;
+				return true;
+			}
+		}
+	}
+
+	// Built-in fallbacks if scripts/ammo_drops.txt is unavailable
+	struct DefaultAmmoDrop_t
+	{
+		const char* pszAmmo;
+		const char* pszEntity;
+		int iAmount;
+	};
+
+	static const DefaultAmmoDrop_t s_Defaults[] =
+	{
+		{ "Pistol",      "item_ammo_pistol",    20 },
+		{ "SMG1",        "item_ammo_smg1",      45 },
+		{ "AR2",         "item_ammo_ar2",       20 },
+		{ "Buckshot",    "item_box_buckshot",   20 },
+		{ "357",         "item_ammo_357",       6  },
+		{ "XBowBolt",    "item_ammo_crossbow",  6  },
+		{ "RPG_Round",   "item_rpg_round",      1  },
+		{ "FlareRound",  "item_flare_round",    1  },
+		{ "GLGrenade",   "item_ammo_glgrenade", 1  },
+		{ "Grenade",     "item_grenade_frag",   1  },
+		{ "SLAM",        "item_slam",           1  },
+	};
+
+	for (int i = 0; i < ARRAYSIZE(s_Defaults); i++)
+	{
+		if (Q_stricmp(pszAmmoName, s_Defaults[i].pszAmmo) == 0)
+		{
+			Q_strncpy(pszEntityNameOut, s_Defaults[i].pszEntity, iMaxLen);
+			iDropAmountOut = s_Defaults[i].iAmount;
+			return true;
+		}
+	}
+
+	Q_strncpy(pszEntityNameOut, "item_ammo_crate", iMaxLen);
+	iDropAmountOut = 10;
+	return true;
+}
 
 const char *g_pszMPConcepts[] =
 {

@@ -1,0 +1,86 @@
+"Resource/UI/GashuntCreateServer.res"
+{
+    "Thumbnail"
+    {
+        "ControlName"		"ImagePanel"
+        "fieldName"			"Thumbnail"
+        "xpos"				"122"
+        "ypos"				"25"
+        "wide"				"256"
+        "tall"				"144"
+        "autoResize"		"0"
+        "pinCorner"			"0"
+        "visible"			"1"
+        "enabled"			"1"
+        "scaleImage"		"1"
+    }
+    
+    "Prev"
+    {
+        "ControlName"		"Button"
+        "fieldName"			"Prev"
+        "xpos"				"122"
+        "ypos"				"180"
+        "wide"				"35"
+        "tall"				"28"
+        "autoResize"		"0"
+        "pinCorner"			"0"
+        "visible"			"1"
+        "enabled"			"1"
+        "labelText"			"<"
+        "Command"			"PrevCamp"
+        "font"				"DefaultLarge"
+    }
+
+    "CampName"
+    {
+        "ControlName"		"Label"
+        "fieldName"			"CampName"
+        "xpos"				"165"
+        "ypos"				"180"
+        "wide"				"170"
+        "tall"				"28"
+        "autoResize"		"0"
+        "pinCorner"			"0"
+        "visible"			"1"
+        "enabled"			"1"
+        "labelText"			"Campaign Name"
+        "textAlignment"		"center"
+        "font"				"DefaultLarge"
+    }
+
+    "Next"
+    {
+        "ControlName"		"Button"
+        "fieldName"			"Next"
+        "xpos"				"343"
+        "ypos"				"180"
+        "wide"				"35"
+        "tall"				"28"
+        "autoResize"		"0"
+        "pinCorner"			"0"
+        "visible"			"1"
+        "enabled"			"1"
+        "labelText"			">"
+        "Command"			"NextCamp"
+        "font"				"DefaultLarge"
+    }
+
+    "CampDesc"
+    {
+        "ControlName"		"Label"
+        "fieldName"			"CampDesc"
+        "xpos"				"62"
+        "ypos"				"225"
+        "wide"				"376"
+        "tall"				"80"
+        "autoResize"		"0"
+        "pinCorner"			"0"
+        "visible"			"1"
+        "enabled"			"1"
+        "labelText"			"Description goes here..."
+        "textAlignment"		"center"
+        "wrap"				"1"
+        "font"				"Default"
+    }
+}

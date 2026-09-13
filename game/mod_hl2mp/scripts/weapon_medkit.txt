@@ -1,0 +1,77 @@
+// Citizen package. Not really a weapon, just needs to be a visible model for citizens to open.
+
+WeaponData
+{
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"				"#MODHL2MP_Medkit"
+	// "viewmodel"			"models/weapons/w_healer.mdl"
+	// "playermodel"		"models/weapons/w_medkit_weapon.mdl"
+	"playermodel"			"models/items/healthkit.mdl"	
+	"viewmodel"				"models/weapons/v_medkit_weapon.mdl"
+	"anim_prefix"			"healer"
+	"bucket"				"7"
+	"bucket_position"		"0"
+
+	"clip_size"				"-1"
+	"clip2_size"			"-1"
+
+	"default_clip"			"-1"
+	"default_clip2"			"-1"
+
+	"primary_ammo"			"Medkit"
+	"secondary_ammo"		"None"
+
+	"weight"				"0"
+	"item_flags"			"0"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		"weapon"
+		{
+			file vgui/weapon_icons/icon_medkit
+			x 0
+			y 0
+			width 128
+			height 128
+		}
+		"weapon_s"
+		{	
+			file vgui/weapon_icons/icon_medkit_selected
+			x 0
+			y 0
+			width 128
+			height 128
+		}	
+		"weapon_small"
+		{
+				"font"		"WeaponIconsSmall"
+				"character"	"b"
+		}
+		"ammo"
+		{
+				"font"		"WeaponIconsSmall"
+				"character"	"s"
+		}
+		"crosshair" 
+		{
+				//"font"		"HPH_HUD_Crosshair"
+				//"character"	"n"
+				"font"		"HL2MModCrosshairs"
+				"character"	"i"
+		}		
+		"autoaim"
+		{
+				"file"		"sprites/crosshairs"
+				"x"			"0"
+				"y"			"48"
+				"width"		"24"
+				"height"	"24"
+		}
+	}
+}

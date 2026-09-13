@@ -6,9 +6,9 @@ WeaponData
 	"printname"			"#HL2_357Handgun"
 	"viewmodel"			"models/weapons/v_357.mdl"
 	"playermodel"		"models/weapons/w_357.mdl"
-	"anim_prefix"		"python"
+	"anim_prefix"		"anim"
 	"bucket"			"1"
-	"bucket_position"	"1"
+	"bucket_position"	"51"
 
 	"clip_size"			"6"
 	"default_clip"		"6"
@@ -52,16 +52,23 @@ WeaponData
 		}
 		"crosshair"
 		{
-				"font"		"Crosshairs"
-				"character"	"Q"
+				"font"		"HL2MModCrosshairs"
+				"character"	"b"
+		}
+		"zoom"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"b"
 		}
 		"autoaim"
 		{
-				"file"		"sprites/crosshairs"
-				"x"			"0"
-				"y"			"48"
-				"width"		"24"
-				"height"	"24"
+				"font"		"HL2MModCrosshairs"
+				"character"	"b"
+		}
+		"zoom_autoaim"
+		{
+				"font"		"HL2MModCrosshairs"
+				"character"	"b"
 		}
 	}
 }
