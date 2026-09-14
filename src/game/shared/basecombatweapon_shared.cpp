@@ -298,6 +298,17 @@ void CBaseCombatWeapon::Precache( void )
 		{
 			m_iWorldModelIndex = CBaseEntity::PrecacheModel( GetWorldModel() );
 		}
+		//TOMBERT_L4D2MODELS_EDIT
+				// Precache optional L4D2 models
+		if (GetWpnData().szAnimationModel[0])
+		{
+			CBaseEntity::PrecacheModel(GetWpnData().szAnimationModel);
+		}
+		if (GetWpnData().szArmsModel[0])
+		{
+			CBaseEntity::PrecacheModel(GetWpnData().szArmsModel);
+		}
+		//TOMBERT_L4D2MODELS_EDIT_konec
 
 		// Precache sounds, too
 		for ( int i = 0; i < NUM_SHOOT_SOUND_TYPES; ++i )

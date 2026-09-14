@@ -62,13 +62,6 @@ CBaseViewModel::~CBaseViewModel()
 {
 }
 
-void CBaseViewModel::UpdateOnRemove( void )
-{
-	BaseClass::UpdateOnRemove();
-
-	DestroyControlPanels();
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -309,37 +302,57 @@ void CBaseViewModel::RemoveEffects( int nEffects )
 // Purpose: 
 // Input  : *modelname - 
 //-----------------------------------------------------------------------------
-void CBaseViewModel::SetWeaponModel( const char *modelname, CBaseCombatWeapon *weapon )
+//TOMBERT_L4D2MODELS_EDIT
+void CBaseViewModel::SetWeaponModel(const char* modelname, CBaseCombatWeapon* weapon)
 {
+	const char* pszFallback = modelname;
+	bool bSeparated = false;
+
+	// Swap out the model for the animation skeleton if using L4D2 models
+	if (weapon && weapon->GetWpnData().bUsesSeparatedViewModel)
+	{
+		pszFallback = weapon->GetWpnData().szAnimationModel;
+		bSeparated = true;
+	}
+
 	m_hWeapon = weapon;
 
 #if defined( CLIENT_DLL )
-	SetModel( modelname );
+	SetModel(pszFallback);
+
+	if (bSeparated)
+	{
+		UpdateSeparatedModels(weapon);
+	}
+	else
+	{
+		DestroySeparatedModels();
+	}
 #else
 	string_t str;
-	if ( modelname != NULL )
+	if (pszFallback != NULL)
 	{
-		str = MAKE_STRING( modelname );
+		str = MAKE_STRING(pszFallback);
 	}
 	else
 	{
 		str = NULL_STRING;
 	}
 
-	if ( str != m_sVMName )
+	if (str != m_sVMName)
 	{
-		// Msg( "SetWeaponModel %s at %f\n", modelname, gpGlobals->curtime );
 		m_sVMName = str;
-		SetModel( STRING( m_sVMName ) );
-
-		// Create any vgui control panels associated with the weapon
-		SpawnControlPanels();
-
-		bool showControlPanels = weapon && weapon->ShouldShowControlPanels();
-		SetControlPanelsActive( showControlPanels );
+		SetModel(STRING(m_sVMName));
 	}
+
+	// Create any vgui control panels associated with the weapon
+	SpawnControlPanels();
+
+	bool showControlPanels = weapon && weapon->ShouldShowControlPanels();
+	SetControlPanelsActive(showControlPanels);
 #endif
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -688,3 +701,13 @@ bool CBaseViewModel::GetAttachmentVelocity( int number, Vector &originVel, Quate
 }
 
 #endif
+
+//TOMBERT_L4D2MODELS_EDIT: Safely handle entity removal across client and server architectures
+void CBaseViewModel::UpdateOnRemove(void)
+{
+#if defined( CLIENT_DLL )
+	DestroySeparatedModels();
+#endif
+	BaseClass::UpdateOnRemove();
+}
+//TOMBERT_L4D2MODELS_EDIT_konec

@@ -310,6 +310,11 @@ bool ReadWeaponDataFromFileForSlot( IFileSystem* pFilesystem, const char *szWeap
 
 FileWeaponInfo_t::FileWeaponInfo_t()
 {
+	//TOMBERT_L4D2MODELS_NEW
+	szAnimationModel[0] = '\0';
+	szArmsModel[0] = '\0';
+	bUsesSeparatedViewModel = false;
+	//TOMBERT_L4D2MODELS_NEW_konec
 	bParsedScript = false;
 	bLoadedHudElements = false;
 	szClassName[0] = 0;
@@ -368,6 +373,13 @@ void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponNam
 	Q_strncpy( szAnimationPrefix, pKeyValuesData->GetString( "anim_prefix" ), MAX_WEAPON_PREFIX );
 	iSlot = pKeyValuesData->GetInt( "bucket", 0 );
 	iPosition = pKeyValuesData->GetInt( "bucket_position", 0 );
+
+	//TOMBERT_L4D2MODELS_EDIT
+		// [Load L4D2 separated models data]
+	Q_strncpy(szAnimationModel, pKeyValuesData->GetString("animationmodel", ""), MAX_WEAPON_STRING);
+	Q_strncpy(szArmsModel, pKeyValuesData->GetString("armsmodel", ""), MAX_WEAPON_STRING);
+	bUsesSeparatedViewModel = (szAnimationModel[0] != '\0');
+	//TOMBERT_L4D2MODELS_EDIT_konec
 	
 	// Use the console (X360) buckets if hud_fastswitch is set to 2.
 #ifdef CLIENT_DLL
@@ -403,7 +415,6 @@ void FileWeaponInfo_t::Parse( KeyValues *pKeyValuesData, const char *szWeaponNam
 			iFlags |= g_ItemFlags[i].m_iFlagValue;
 		}
 	}
-
 
 	bShowUsageHint = ( pKeyValuesData->GetInt( "showusagehint", 0 ) != 0 ) ? true : false;
 	bAutoSwitchTo = ( pKeyValuesData->GetInt( "autoswitchto", 1 ) != 0 ) ? true : false;

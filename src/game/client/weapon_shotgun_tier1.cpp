@@ -59,6 +59,7 @@ public:
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
 	void DryFire(void);
+	void Precache(void);
 	virtual float GetFireRate(void) { return 0.5; };
 
 #ifndef CLIENT_DLL
@@ -613,6 +614,14 @@ void CWeaponShotgun_Tier1::ItemHolsterFrame(void)
 		GetOwner()->RemoveAmmo(ammoFill, GetPrimaryAmmoType());
 		m_iClip1 += ammoFill;
 	}
+}
+void CWeaponShotgun_Tier1::Precache(void)
+{
+	BaseClass::Precache();
+
+	PrecacheModel("models/v_models/v_autoshotgun.mdl");
+	PrecacheModel("models/v_models/anim_v_autoshotgun.mdl");
+	PrecacheModel("models/weapons/arms/v_arms_mechanic_new.mdl");
 }
 
 //==================================================

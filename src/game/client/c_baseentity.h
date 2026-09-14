@@ -38,6 +38,9 @@
 #include "toolframework/itoolentity.h"
 #include "tier0/threadtools.h"
 
+//ITELLISENSE FIX
+struct StartSoundParams_t;
+
 class C_Team;
 class IPhysicsObject;
 class IClientVehicle;

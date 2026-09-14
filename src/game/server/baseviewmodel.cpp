@@ -16,6 +16,10 @@
 #include "saverestore_utlvector.h"
 #include "hltvdirector.h"
 
+//TOMBERT_L4D2MODELS_EDIT
+#include "basecombatweapon_shared.h" 
+//TOMBERT_L4D2MODELS_EDIT_konec
+// 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -114,3 +118,29 @@ void CBaseViewModel::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )
 			pScreen->SetTransmit( pInfo, bAlways );
 	}
 }
+
+/*
+//TOMBERT_L4D2MODELS_EDIT
+void CBaseViewModel::SetWeaponModel(const char* pszModelname, CBaseCombatWeapon* weapon)
+{
+	const char* pszFallback = pszModelname;
+
+	// If this weapon uses separated models, override the server's master model with the animation model.
+	if (weapon && weapon->GetWpnData().bUsesSeparatedViewModel)
+	{
+		pszFallback = weapon->GetWpnData().szAnimationModel;
+	}
+
+	int iModelIndex = modelinfo->GetModelIndex(pszFallback);
+	if (iModelIndex == -1)
+	{
+		iModelIndex = PrecacheModel(pszFallback);
+	}
+
+	if (iModelIndex == -1)
+		return;
+
+	SetModelIndex(iModelIndex);
+}
+//TOMBERT_L4D2MODELS_EDIT_konec
+*/

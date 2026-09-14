@@ -99,6 +99,13 @@ public:
 	char					szAmmo1[MAX_WEAPON_AMMO_NAME];			// "primary" ammo type
 	char					szAmmo2[MAX_WEAPON_AMMO_NAME];			// "secondary" ammo type
 
+	//TOMBERT_L4D2MODELS_EDIT
+		// [New properties for L4D2 separated viewmodels]
+	char		szAnimationModel[MAX_WEAPON_STRING]; // Animation driver model
+	char		szArmsModel[MAX_WEAPON_STRING];      // Default arm model
+	bool		bUsesSeparatedViewModel;
+	//TOMBERT_L4D2MODELS_EDIT_konec
+
 	// Sound blocks
 	char					aShootSounds[NUM_SHOOT_SOUND_TYPES][MAX_WEAPON_STRING];	
 

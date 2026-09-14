@@ -415,8 +415,9 @@ LINK_ENTITY_TO_CLASS( player, C_BasePlayer );
 // -------------------------------------------------------------------------------- //
 // Functions.
 // -------------------------------------------------------------------------------- //
-C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOffset" )
+C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset("C_BasePlayer::m_iv_vecViewOffset")
 {
+	m_szArmsModel[0] = '\0'; // Initialize empty arms
 	AddVar( &m_vecViewOffset, &m_iv_vecViewOffset, LATCH_SIMULATION_VAR );
 
 	AddVar( &m_Local.m_vecPunchAngle, &m_Local.m_iv_vecPunchAngle, LATCH_SIMULATION_VAR );
@@ -3083,4 +3084,24 @@ void CC_DumpClientSoundscapeData( const CCommand& args )
 
 	Msg("End dump.\n");
 }
+
+//TOMBERT_L4D2MODELS_NEW
+const char* C_BasePlayer::GetArmsModel(void) const
+{
+	if (m_szArmsModel[0] != '\0')
+		return m_szArmsModel;
+
+	// Absolute fallback if neither the weapon script nor player has arms defined
+	return "models/weapons/v_arms.mdl";
+}
+
+void C_BasePlayer::SetArmsModel(const char* pszModel)
+{
+	if (pszModel)
+		Q_strncpy(m_szArmsModel, pszModel, sizeof(m_szArmsModel));
+	else
+		m_szArmsModel[0] = '\0';
+}
+//TOMBERT_L4D2MODELS_NEW_konec
+
 static ConCommand soundscape_dumpclient("soundscape_dumpclient", CC_DumpClientSoundscapeData, "Dumps the client's soundscape data.\n", FCVAR_CHEAT);

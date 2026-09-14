@@ -19,8 +19,8 @@
 #include <KeyValues.h>
 #include "hltvcamera.h"
 #ifdef TF_CLIENT_DLL
-	#include "c_tf_player.h"
-	#include "tf_weaponbase.h"
+#include "c_tf_player.h"
+#include "tf_weaponbase.h"
 #endif
 
 #if defined( REPLAY_ENABLED )
@@ -35,14 +35,6 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-
-#ifdef CSTRIKE_DLL
-	ConVar cl_righthand( "cl_righthand", "1", FCVAR_ARCHIVE, "Use right-handed view models." );
-#endif
-
-#ifdef TF_CLIENT_DLL
-	ConVar cl_flipviewmodels( "cl_flipviewmodels", "0", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_NOT_CONNECTED, "Flip view models." );
-#endif
 
 void PostToolMessage( HTOOLHANDLE hEntity, KeyValues *msg );
 
@@ -91,6 +83,26 @@ void FormatViewModelAttachment( Vector &vOrigin, bool bInverse )
 	Vector vOut = (MainViewRight() * vTransformed.x) + (MainViewUp() * vTransformed.y) + (MainViewForward() * vTransformed.z);
 	vOrigin = pViewSetup->origin + vOut;
 }
+
+//TOMBERT_L4D2MODELS_NEW
+class C_ViewModelAttachmentModel : public C_BaseAnimating
+{
+	DECLARE_CLASS(C_ViewModelAttachmentModel, C_BaseAnimating);
+public:
+	virtual bool IsViewModel() const { return false; }
+	virtual bool IsMenuModel() const { return false; }
+	virtual bool IsFollowingEntity() const { return false; }
+
+	virtual int DrawModel(int flags)
+	{
+		// Prevent drawing if the model hasn't loaded or initialized yet
+		if (!m_bReadyToDraw || !GetModelPtr())
+			return 0;
+
+		return InternalDrawModel(flags);
+	}
+};
+//TOMBERT_L4D2MODELS_NEW_konec
 
 #ifdef TF_CLIENT_DLL
 bool TeamFortress_ShouldFlipClientViewModel( void )
@@ -298,73 +310,6 @@ bool C_BaseViewModel::ShouldDraw()
 // Purpose: Render the weapon. Draw the Viewmodel if the weapon's being carried
 //			by this player, otherwise draw the worldmodel.
 //-----------------------------------------------------------------------------
-int C_BaseViewModel::DrawModel( int flags )
-{
-	if ( !m_bReadyToDraw )
-		return 0;
-
-	if ( flags & STUDIO_RENDER )
-	{
-		// Determine blending amount and tell engine
-		float blend = (float)( GetFxBlend() / 255.0f );
-
-		// Totally gone
-		if ( blend <= 0.0f )
-			return 0;
-
-		// Tell engine
-		render->SetBlend( blend );
-
-		float color[3];
-		GetColorModulation( color );
-		render->SetColorModulation(	color );
-	}
-		
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
-
-#ifdef TF_CLIENT_DLL
-	CTFWeaponBase* pTFWeapon = dynamic_cast<CTFWeaponBase*>( pWeapon );
-	if ( ( flags & STUDIO_RENDER ) && pTFWeapon && pTFWeapon->m_viewmodelStatTrakAddon )
-	{
-		pTFWeapon->m_viewmodelStatTrakAddon->RemoveEffects( EF_NODRAW );
-		pTFWeapon->m_viewmodelStatTrakAddon->DrawModel( flags );
-		pTFWeapon->m_viewmodelStatTrakAddon->AddEffects( EF_NODRAW );
-	}
-#endif
-
-	int ret;
-	// If the local player's overriding the viewmodel rendering, let him do it
-	if ( pPlayer && pPlayer->IsOverridingViewmodel() )
-	{
-		ret = pPlayer->DrawOverriddenViewmodel( this, flags );
-	}
-	else if ( pWeapon && pWeapon->IsOverridingViewmodel() )
-	{
-		ret = pWeapon->DrawOverriddenViewmodel( this, flags );
-	}
-	else
-	{
-		ret = BaseClass::DrawModel( flags );
-	}
-
-	// Now that we've rendered, reset the animation restart flag
-	if ( flags & STUDIO_RENDER )
-	{
-		if ( m_nOldAnimationParity != m_nAnimationParity )
-		{
-			m_nOldAnimationParity = m_nAnimationParity;
-		}
-		// Tell the weapon itself that we've rendered, in case it wants to do something
-		if ( pWeapon )
-		{
-			pWeapon->ViewModelDrawn( this );
-		}
-	}
-
-	return ret;
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -527,3 +472,124 @@ RenderGroup_t C_BaseViewModel::GetRenderGroup()
 {
 	return RENDER_GROUP_VIEW_MODEL_OPAQUE;
 }
+
+//TOMBERT_L4D2MODELS_EDIT
+
+int C_BaseViewModel::DrawModel(int flags)
+{
+	if (!m_bReadyToDraw)
+		return 0;
+
+	return InternalDrawModel(flags);
+}
+//TOMBERT_L4D2MODELS_EDIT_konec
+
+//TOMBERT_L4D2MODELS_NEW
+void CBaseViewModel::UpdateSeparatedModels(CBaseCombatWeapon* weapon)
+{
+#if defined( CLIENT_DLL )
+	if (!weapon)
+	{
+		DestroySeparatedModels();
+		return;
+	}
+
+	const FileWeaponInfo_t& info = weapon->GetWpnData();
+
+	// 1. Process Weapon Model
+	if (info.szViewModel[0])
+	{
+		int nModelIndex = modelinfo->GetModelIndex(info.szViewModel);
+		if (nModelIndex == -1)
+		{
+			CBaseEntity::PrecacheModel(info.szViewModel);
+			nModelIndex = modelinfo->GetModelIndex(info.szViewModel);
+		}
+
+		if (nModelIndex != -1)
+		{
+			if (!m_hWeaponModel.Get())
+			{
+				C_ViewModelAttachmentModel* pEnt = new C_ViewModelAttachmentModel;
+				if (pEnt)
+				{
+					pEnt->SetModelIndex(nModelIndex);
+					pEnt->FollowEntity(this, true);
+					pEnt->AddEffects(EF_BONEMERGE | EF_BONEMERGE_FASTCULL);
+					pEnt->PreDataUpdate(DATA_UPDATE_CREATED);
+					m_hWeaponModel = pEnt;
+				}
+			}
+			else
+			{
+				m_hWeaponModel->SetModel(info.szViewModel);
+			}
+		}
+	}
+	else if (m_hWeaponModel.Get())
+	{
+		m_hWeaponModel->Remove();
+		m_hWeaponModel = NULL;
+	}
+
+	// 2. Process Arms Model
+	const char* pszArms = info.szArmsModel;
+	if (!pszArms || !pszArms[0])
+	{
+		C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+		if (pPlayer)
+		{
+			pszArms = pPlayer->GetArmsModel();
+		}
+	}
+
+	if (pszArms && pszArms[0])
+	{
+		int nArmsIndex = modelinfo->GetModelIndex(pszArms);
+		if (nArmsIndex == -1)
+		{
+			CBaseEntity::PrecacheModel(pszArms);
+			nArmsIndex = modelinfo->GetModelIndex(pszArms);
+		}
+
+		if (nArmsIndex != -1)
+		{
+			if (!m_hArmsModel.Get())
+			{
+				C_ViewModelAttachmentModel* pEnt = new C_ViewModelAttachmentModel;
+				if (pEnt)
+				{
+					pEnt->SetModelIndex(nArmsIndex);
+					pEnt->FollowEntity(this, true);
+					pEnt->AddEffects(EF_BONEMERGE | EF_BONEMERGE_FASTCULL);
+					pEnt->PreDataUpdate(DATA_UPDATE_CREATED);
+					m_hArmsModel = pEnt;
+				}
+			}
+			else
+			{
+				m_hArmsModel->SetModel(pszArms);
+			}
+		}
+	}
+	else if (m_hArmsModel.Get())
+	{
+		m_hArmsModel->Remove();
+		m_hArmsModel = NULL;
+	}
+}
+void CBaseViewModel::DestroySeparatedModels()
+{
+	if (m_hWeaponModel.Get())
+	{
+		m_hWeaponModel->Remove();
+		m_hWeaponModel = NULL;
+	}
+	if (m_hArmsModel.Get())
+	{
+		m_hArmsModel->Remove();
+		m_hArmsModel = NULL;
+	}
+}
+#endif
+//TOMBERT_L4D2MODELS_NEW_konec

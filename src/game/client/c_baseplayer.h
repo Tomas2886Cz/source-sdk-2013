@@ -83,6 +83,16 @@ public:
 	virtual void	SharedSpawn(); // Shared between client and server.
 	virtual bool	GetSteamID( CSteamID *pID );
 
+	//TOMBERT_L4D2MODELS_EDIT
+	// [L4D2 Viewmodel Arms Extension]
+	virtual const char* GetArmsModel(void) const;
+	virtual void SetArmsModel(const char* pszModel);
+
+private:
+	char m_szArmsModel[MAX_PATH];
+public:
+	//TOMBERT_L4D2MODELS_EDIT_konec
+
 	// IClientEntity overrides.
 	virtual void	OnPreDataChanged( DataUpdateType_t updateType );
 	virtual void	OnDataChanged( DataUpdateType_t updateType );
