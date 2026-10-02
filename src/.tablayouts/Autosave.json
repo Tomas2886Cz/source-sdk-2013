@@ -1,0 +1,23 @@
+{
+  "ExtensionName": "Simple Tab Saver",
+  "ExtensionVersion": "1.7.2",
+  "SchemaVersion": "1.0",
+  "Name": "Autosave",
+  "SolutionName": "games_hl2mp",
+  "CreatedAtUtc": "2026-09-15T17:10:54.7320722Z",
+  "LastSavedAtUtc": "2026-09-15T17:10:54.7320722Z",
+  "IsHidden": true,
+  "IsStarred": false,
+  "IsAutosave": true,
+  "ActiveTabFilePath": "game\\shared\\weapon_parse.cpp",
+  "Tabs": [
+    {
+      "Order": 0,
+      "FilePath": "game\\shared\\weapon_parse.cpp",
+      "IsPinned": false,
+      "LineNumber": 317,
+      "ColumnNumber": 35,
+      "TopLineNumber": 293
+    }
+  ]
+}

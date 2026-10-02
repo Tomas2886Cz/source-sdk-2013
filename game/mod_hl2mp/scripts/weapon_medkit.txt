@@ -3,11 +3,7 @@
 WeaponData
 {
 	// Weapon data is loaded by both the Game and Client DLLs.
-	"printname"				"#MODHL2MP_Medkit"
-	// "viewmodel"			"models/weapons/w_healer.mdl"
-	// "playermodel"		"models/weapons/w_medkit_weapon.mdl"
-	"playermodel"			"models/items/healthkit.mdl"	
-	"viewmodel"				"models/weapons/v_medkit_weapon.mdl"
+	"printname"				"#RIPOFF_Medkit"
 	"anim_prefix"			"healer"
 	"bucket"				"7"
 	"bucket_position"		"0"
@@ -23,6 +19,17 @@ WeaponData
 
 	"weight"				"0"
 	"item_flags"			"0"
+	
+		////////////	
+		// Ripoff //
+		////////////	
+	
+	"UseCombinedViewModels"		"1"
+	"HandModel"					"models/weapons/arms/v_arms_mechanic_new.mdl"
+	"AnimModel"					"" //Optional. If missing, 'viewmodel' is used as root.
+	"AttachmentBone"			"" //Optional. Leave blank to Bonemerge (recommended)	
+	"viewmodel"					"models/weapons/v_medkit_weapon.mdl"
+	"playermodel"				"models/items/healthkit.mdl"		
 
 	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
 	SoundData

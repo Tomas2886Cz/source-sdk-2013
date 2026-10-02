@@ -624,7 +624,7 @@ public:
 };
 
 // Utility function
-bool FindInList( const char **pStrings, const char *pToFind );
+static bool FindInList( const char **pStrings, const char *pToFind );
 
 inline CTeamplayRoundBasedRules* TeamplayRoundBasedRules()
 {
